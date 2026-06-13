@@ -4,6 +4,7 @@ import { tsIgnoreUnexplainedDetector } from "./type-anesthesia/ts-ignore-unexpla
 import { nonNullAssertionNearNullableDetector } from "./type-anesthesia/non-null-assertion-near-nullable.js";
 import { debugConsoleLogDetector } from "./dead-leftovers/debug-console-log.js";
 import { newTodoInDiffDetector } from "./dead-leftovers/new-todo-in-diff.js";
+import { commentedOutCodeDetector } from "./dead-leftovers/commented-out-code.js";
 import { unresolvedImportDetector } from "./phantom-dependency/unresolved-import.js";
 
 /**
@@ -17,5 +18,6 @@ export const detectors: Detector[] = [
   nonNullAssertionNearNullableDetector,
   debugConsoleLogDetector,
   newTodoInDiffDetector,
+  commentedOutCodeDetector,
   unresolvedImportDetector,
 ];

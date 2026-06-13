@@ -34,10 +34,17 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 ### dead-leftovers
 - [x] `debug-console-log` — `console.log`/`print`-style debug statement
       added in the diff
-- [ ] `unused-export` — new export with zero references within the file
-      (repo-wide reference checking is a phase-3 concern; file-local is fine
-      for phase 1)
-- [ ] `commented-out-code` — a block of commented-out code added in the diff
+- [ ] `unused-export` — deferred to phase 3 (needs repo-wide reference data).
+      Unlike the other three rules in this category, the file-local "zero
+      references" approximation is *unsound* for exported symbols: `export`
+      means "for cross-file use," so being unreferenced within its own file is
+      the normal case, not a leftover signal — a file-local detector fires on
+      essentially every export. Resolving it requires knowing whether any other
+      file imports the symbol, which doesn't exist until the repo-context
+      infrastructure lands. (The other three rules — `debug-console-log`,
+      `commented-out-code`, `new-todo-in-diff` — are genuinely diff-local
+      signals, so file-local detection is correct for them.)
+- [x] `commented-out-code` — a block of commented-out code added in the diff
 - [x] `new-todo-in-diff` — new `TODO`/`FIXME`/`XXX` comment on changed lines
 
 ### dependency-creep

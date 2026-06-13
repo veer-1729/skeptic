@@ -1,0 +1,9 @@
+[
+  {
+    "category": "dead-leftovers",
+    "ruleId": "commented-out-code",
+    "lineStart": 1,
+    "lineEnd": 3,
+    "severity": "low"
+  }
+]
