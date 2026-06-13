@@ -1,0 +1,9 @@
+[
+  {
+    "category": "type-anesthesia",
+    "ruleId": "ts-ignore-unexplained",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "severity": "high"
+  }
+]
