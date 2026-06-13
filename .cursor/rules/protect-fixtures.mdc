@@ -1,0 +1,25 @@
+---
+description: Fixtures are the spec — never edit them during implementation
+globs: ["fixtures/**", "src/**"]
+alwaysApply: true
+---
+
+Files under `fixtures/` (`input.*`, `expected.json`, `meta.json`) are the
+specification for detectors. They are written and reviewed by a human in a
+dedicated "fixtures session" for each category, before any implementation
+work starts.
+
+When implementing, modifying, or debugging a detector:
+
+- Never create, edit, or delete any file under `fixtures/`.
+- If a fixture appears wrong (line numbers don't match `input.*`, category
+  or ruleId looks mislabeled, two fixtures seem contradictory), STOP and
+  explain the specific problem instead of editing the fixture or writing a
+  detector shaped to match it.
+- A failing fixture means the detector is incomplete or incorrect. It does
+  not mean the fixture is wrong — that's the rare exception, handled as its
+  own explicitly-reviewed change, never folded into "make the tests pass."
+
+At the end of any implementation session, `git diff --stat fixtures/` must
+be empty. If it isn't, that's the first thing to report, before anything
+else about the session's results.

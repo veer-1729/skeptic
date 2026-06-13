@@ -1,0 +1,31 @@
+---
+description: Detector implementation pattern
+globs: ["src/detectors/**", "src/harness/**", "src/types.ts"]
+alwaysApply: true
+---
+
+Every detector:
+
+- Lives at `src/detectors/<category>/<rule-id>.ts`, one rule per file.
+- Exports a `const` implementing the `Detector` interface from
+  `src/types.ts`: `{ id, category, run(input: DetectorInput): Finding[] }`.
+- `run` is pure: no network access, no filesystem access beyond `input`, no
+  global state. Anything a detector needs beyond the file's content goes
+  through `input.meta`.
+- Is registered in `src/detectors/index.ts`.
+
+Use `src/detectors/type-anesthesia/as-any-cast.ts` and
+`src/detectors/phantom-dependency/unresolved-import.ts` as the reference
+implementations — same shape, same use of the TypeScript AST via
+`ts.createSourceFile` + `ts.forEachChild`, same `meta`-driven severity
+tagging.
+
+Prefer AST traversal over regex for anything with a syntax tree (casts,
+imports, catch blocks, declarations). Regex is acceptable for genuinely
+textual signals (e.g. scanning comment text for keywords like "ensure" /
+"guarantee").
+
+After any change: run `npm test`. Read the full report, not just the
+fixtures for the category you're working on — a new detector firing on an
+existing fixture is a false positive that needs fixing before the category
+is done.
