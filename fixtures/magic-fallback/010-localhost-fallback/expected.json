@@ -1,0 +1,9 @@
+[
+  {
+    "category": "magic-fallback",
+    "ruleId": "localhost-fallback-url",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "high"
+  }
+]
