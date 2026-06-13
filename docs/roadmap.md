@@ -66,10 +66,10 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
   (env access outside the repo's config module) is convention-drift territory.
 
 ### error-fog
-- [ ] `empty-catch` — catch block with no body or comment-only body
-- [ ] `broad-catch-generic-500` — catch block converts to a generic
+- [x] `empty-catch` — catch block with no body or comment-only body
+- [x] `broad-catch-generic-500` — catch block converts to a generic
       string/500 response and drops the original error/cause
-- [ ] `swallowed-promise-rejection` — `.catch(() => {})` or a clearly
+- [x] `swallowed-promise-rejection` — `.catch(() => {})` or a clearly
       unawaited promise on a call that can reject
 
 ## Phase 2 — Slop ranking engine

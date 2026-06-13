@@ -17,7 +17,12 @@ export const manifestUnresolvedDependencyDetector: Detector = {
     const { file, content, meta } = input;
     if (!isManifest(file)) return [];
 
-    const known = new Set(meta?.packages?.known ?? []);
+    // No known-package set means no registry resolution context — stay silent
+    // rather than declaring every dependency unresolved. An explicit empty
+    // `known: []` still means "nothing resolves" and will fire.
+    if (meta?.packages?.known === undefined) return [];
+
+    const known = new Set(meta.packages.known);
     const findings: Finding[] = [];
 
     for (const entry of parseManifest(file, content)) {

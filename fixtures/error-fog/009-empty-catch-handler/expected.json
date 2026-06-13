@@ -1,0 +1,9 @@
+[
+  {
+    "category": "error-fog",
+    "ruleId": "swallowed-promise-rejection",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "medium"
+  }
+]
