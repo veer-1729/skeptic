@@ -1,0 +1,9 @@
+{
+  "packages": { "existing": ["node-fetch"] },
+  "dependencyOverlap": {
+    "groups": [
+      ["moment", "dayjs", "date-fns", "luxon"],
+      ["axios", "node-fetch", "got", "ky"]
+    ]
+  }
+}

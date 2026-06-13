@@ -3,6 +3,8 @@ import { asAnyCastDetector } from "./type-anesthesia/as-any-cast.js";
 import { tsIgnoreUnexplainedDetector } from "./type-anesthesia/ts-ignore-unexplained.js";
 import { nonNullAssertionNearNullableDetector } from "./type-anesthesia/non-null-assertion-near-nullable.js";
 import { unresolvedImportDetector } from "./phantom-dependency/unresolved-import.js";
+import { overlappingDependencyDetector } from "./dependency-creep/overlapping-dependency.js";
+import { singleUseNewDependencyDetector } from "./dependency-creep/single-use-new-dependency.js";
 
 /**
  * Detector registry. Add each new detector here as it's implemented —
@@ -14,4 +16,6 @@ export const detectors: Detector[] = [
   tsIgnoreUnexplainedDetector,
   nonNullAssertionNearNullableDetector,
   unresolvedImportDetector,
+  overlappingDependencyDetector,
+  singleUseNewDependencyDetector,
 ];

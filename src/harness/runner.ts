@@ -6,8 +6,14 @@ import type { DetectorInput, Finding } from "../types.js";
 
 const FIXTURES_DIR = join(process.cwd(), "fixtures");
 
-function runDetectors(input: DetectorInput): Finding[] {
-  return detectors.flatMap((d) => d.run(input));
+/** Per-file detectors: each changed file, one at a time. */
+function runPerFile(input: DetectorInput): Finding[] {
+  return detectors.flatMap((d) => d.run?.(input) ?? []);
+}
+
+/** Whole-diff detectors: every file in the fixture at once. */
+function runProject(inputs: DetectorInput[]): Finding[] {
+  return detectors.flatMap((d) => d.runProject?.(inputs) ?? []);
 }
 
 interface CategoryStats {
@@ -41,7 +47,10 @@ function main() {
   let failedFixtures = 0;
 
   for (const fixture of fixtures) {
-    const actual = fixture.inputs.flatMap((input) => runDetectors(input));
+    const actual = [
+      ...fixture.inputs.flatMap((input) => runPerFile(input)),
+      ...runProject(fixture.inputs),
+    ];
     const { matched, falseNegatives, falsePositives } = matchFindings(actual, fixture.expected);
 
     const stats: CategoryStats = { tp: matched.length, fp: falsePositives.length, fn: falseNegatives.length };
