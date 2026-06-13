@@ -23,6 +23,12 @@ function precisionRecallF1(s: CategoryStats) {
   return { precision, recall, f1 };
 }
 
+function bump(perCategory: Map<string, CategoryStats>, category: string, key: keyof CategoryStats) {
+  const s = perCategory.get(category) ?? { tp: 0, fp: 0, fn: 0 };
+  s[key]++;
+  perCategory.set(category, s);
+}
+
 function main() {
   const fixtures = loadFixtures(FIXTURES_DIR);
   if (fixtures.length === 0) {
@@ -43,11 +49,12 @@ function main() {
     overall.fp += stats.fp;
     overall.fn += stats.fn;
 
-    const cat = perCategory.get(fixture.category) ?? { tp: 0, fp: 0, fn: 0 };
-    cat.tp += stats.tp;
-    cat.fp += stats.fp;
-    cat.fn += stats.fn;
-    perCategory.set(fixture.category, cat);
+    // Attribute each finding to its own category, not the fixture's — so a
+    // detector that fires on another category's fixture books the false
+    // positive against the right category.
+    for (const m of matched) bump(perCategory, m.actual.category, "tp");
+    for (const fn of falseNegatives) bump(perCategory, fn.category, "fn");
+    for (const fp of falsePositives) bump(perCategory, fp.category, "fp");
 
     const pass = stats.fp === 0 && stats.fn === 0;
     if (!pass) failedFixtures++;

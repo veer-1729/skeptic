@@ -1,0 +1,9 @@
+[
+  {
+    "category": "type-anesthesia",
+    "ruleId": "non-null-assertion-near-nullable",
+    "lineStart": 7,
+    "lineEnd": 7,
+    "severity": "high"
+  }
+]

@@ -32,12 +32,88 @@ export interface Finding {
   confidence: number;
 }
 
+/**
+ * Sensitive domains that bump severity. This is the phase-1 domain-proximity
+ * shortcut from the architecture doc — it moves to the ranking engine in
+ * phase 2. The set of which domains count as "sensitive" lives in one place
+ * (`src/context/domains.ts`), not duplicated per detector.
+ */
+export type Domain =
+  | "payments"
+  | "auth"
+  | "billing"
+  | "permissions"
+  | "migrations"
+  | "pii";
+
+/** Package-resolution context: phantom-dependency + dependency-creep. */
+export interface PackageContext {
+  /** Names that resolve against the (mock, in fixtures) registry. */
+  known?: string[];
+  /**
+   * Dependencies already present in the repo before this diff — the
+   * comparison set for dependency-creep / overlapping-dependency.
+   */
+  existing?: string[];
+  /**
+   * Per-package registry trust metadata for low-trust-new-dependency.
+   * Speculative: that rule has no fixtures yet, so this is intentionally
+   * minimal (just resolution). Expect it to grow real trust signals —
+   * publish age, download counts, source-repo presence — when the rule
+   * gets its fixtures session. Don't build against fields that aren't here.
+   */
+  registry?: Record<string, RegistryInfo>;
+}
+
+export interface RegistryInfo {
+  resolves: boolean;
+}
+
+/**
+ * Functional-overlap groups for dependency-creep's overlapping-dependency
+ * rule (start hardcoded: date libs, HTTP clients, …). Each inner array is a
+ * set of packages that do "the same job".
+ */
+export interface OverlapTable {
+  groups: string[][];
+}
+
+/** Secret/credential signal config for magic-fallback. */
+export interface SecretContext {
+  /** Env-var name fragments that mark a value as a secret (JWT_SECRET, …). */
+  nameHints?: string[];
+}
+
+/**
+ * Context for one analysis unit, supplied per file. Every field is optional and
+ * owned by one concern — a detector reads only its namespace, and a missing
+ * namespace means "no context for this" (empty known-set, no domain, etc.).
+ */
+export interface AnalysisMeta {
+  domain?: Domain;
+  packages?: PackageContext;
+  dependencyOverlap?: OverlapTable;
+  secrets?: SecretContext;
+}
+
+/** A 1-based, inclusive range of lines. */
+export interface LineRange {
+  start: number;
+  end: number;
+}
+
 /** What a detector receives for one changed file. */
 export interface DetectorInput {
   file: string;
   content: string;
-  /** Optional context: domain tags, mock registry data for fixtures, etc. */
-  meta?: Record<string, unknown>;
+  /**
+   * Added line ranges (1-based, inclusive). Absent ⇒ treat the whole file as
+   * added — the phase-1 default, since fixtures are small synthetic snippets
+   * of new code. Lets a fixture later supply real diff context without a
+   * schema change.
+   */
+  addedRanges?: LineRange[];
+  meta?: AnalysisMeta;
 }
 
 export interface Detector {

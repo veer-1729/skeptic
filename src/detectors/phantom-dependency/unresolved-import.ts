@@ -15,7 +15,7 @@ export const unresolvedImportDetector: Detector = {
 
   run({ file, content, meta }) {
     const findings: Finding[] = [];
-    const known = new Set((meta?.knownPackages as string[] | undefined) ?? []);
+    const known = new Set(meta?.packages?.known ?? []);
     const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
     function visit(node: ts.Node) {
