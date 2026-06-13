@@ -1,0 +1,6 @@
+{
+  "packages": {
+    "known": ["date-fns", "react", "lodash"],
+    "existing": ["react", "lodash"]
+  }
+}
