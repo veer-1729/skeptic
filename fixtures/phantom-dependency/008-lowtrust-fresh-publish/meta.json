@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "known": ["lodash", "fresh-utils-pkg"],
+    "registry": {
+      "fresh-utils-pkg": {
+        "resolves": true,
+        "publishedDaysAgo": 3,
+        "weeklyDownloads": 500000,
+        "hasSourceRepo": true
+      }
+    }
+  },
+  "addedRanges": [{ "start": 6, "end": 6 }]
+}

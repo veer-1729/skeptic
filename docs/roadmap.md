@@ -25,11 +25,12 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 
 ### phantom-dependency
 - [x] `unresolved-import` — import of a package not in the known-package set
-- [ ] `manifest-unresolved-dependency` — package.json/requirements.txt entry
+- [x] `manifest-unresolved-dependency` — package.json/requirements.txt entry
       that doesn't resolve against the known-package set
-- [ ] `low-trust-new-dependency` — resolves, but flagged via metadata as
-      new/low-downloads/no-source-repo (fixtures can mock this via meta.json
-      the same way `knownPackages` works today)
+- [x] `low-trust-new-dependency` — resolves, but flagged via metadata as
+      new/low-downloads/no-source-repo (`RegistryInfo` in `src/types.ts` now
+      carries `publishedDaysAgo`, `weeklyDownloads`, and `hasSourceRepo` —
+      the speculative trim from the harness schema change is closed)
 
 ### dead-leftovers
 - [x] `debug-console-log` — `console.log`/`print`-style debug statement

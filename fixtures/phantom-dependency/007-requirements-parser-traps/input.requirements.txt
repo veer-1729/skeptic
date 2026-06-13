@@ -1,0 +1,7 @@
+# Core dependencies
+requests==2.31.0
+
+-r base.txt
+
+flask[async]==3.0.0,<4
+django==4.2; python_version<'3.8'

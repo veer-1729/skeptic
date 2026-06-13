@@ -6,6 +6,8 @@ import { debugConsoleLogDetector } from "./dead-leftovers/debug-console-log.js";
 import { newTodoInDiffDetector } from "./dead-leftovers/new-todo-in-diff.js";
 import { commentedOutCodeDetector } from "./dead-leftovers/commented-out-code.js";
 import { unresolvedImportDetector } from "./phantom-dependency/unresolved-import.js";
+import { manifestUnresolvedDependencyDetector } from "./phantom-dependency/manifest-unresolved-dependency.js";
+import { lowTrustNewDependencyDetector } from "./phantom-dependency/low-trust-new-dependency.js";
 
 /**
  * Detector registry. Add each new detector here as it's implemented —
@@ -20,4 +22,6 @@ export const detectors: Detector[] = [
   newTodoInDiffDetector,
   commentedOutCodeDetector,
   unresolvedImportDetector,
+  manifestUnresolvedDependencyDetector,
+  lowTrustNewDependencyDetector,
 ];

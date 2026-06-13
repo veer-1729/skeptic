@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "known": ["lodash", "no-repo-utils"],
+    "registry": {
+      "no-repo-utils": {
+        "resolves": true,
+        "publishedDaysAgo": 900,
+        "weeklyDownloads": 500000,
+        "hasSourceRepo": false
+      }
+    }
+  },
+  "addedRanges": [{ "start": 6, "end": 6 }]
+}

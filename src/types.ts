@@ -55,18 +55,18 @@ export interface PackageContext {
    * comparison set for dependency-creep / overlapping-dependency.
    */
   existing?: string[];
-  /**
-   * Per-package registry trust metadata for low-trust-new-dependency.
-   * Speculative: that rule has no fixtures yet, so this is intentionally
-   * minimal (just resolution). Expect it to grow real trust signals —
-   * publish age, download counts, source-repo presence — when the rule
-   * gets its fixtures session. Don't build against fields that aren't here.
-   */
+  /** Per-package registry trust metadata for low-trust-new-dependency. */
   registry?: Record<string, RegistryInfo>;
 }
 
 export interface RegistryInfo {
   resolves: boolean;
+  /** Days since the package's latest publish. Small ⇒ suspiciously fresh. */
+  publishedDaysAgo?: number;
+  /** Approx weekly downloads. Near-zero ⇒ low adoption / possible slopsquat. */
+  weeklyDownloads?: number;
+  /** Whether the registry lists a source repository. */
+  hasSourceRepo?: boolean;
 }
 
 /**
