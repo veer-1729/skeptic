@@ -10,6 +10,9 @@ import { overlappingDependencyDetector } from "./dependency-creep/overlapping-de
 import { singleUseNewDependencyDetector } from "./dependency-creep/single-use-new-dependency.js";
 import { manifestUnresolvedDependencyDetector } from "./phantom-dependency/manifest-unresolved-dependency.js";
 import { lowTrustNewDependencyDetector } from "./phantom-dependency/low-trust-new-dependency.js";
+import { envFallbackDetector } from "./magic-fallback/env-fallback.js";
+import { hardcodedSecretFallbackDetector } from "./magic-fallback/hardcoded-secret-fallback.js";
+import { localhostFallbackUrlDetector } from "./magic-fallback/localhost-fallback-url.js";
 
 /**
  * Detector registry. Add each new detector here as it's implemented —
@@ -28,4 +31,7 @@ export const detectors: Detector[] = [
   singleUseNewDependencyDetector,
   manifestUnresolvedDependencyDetector,
   lowTrustNewDependencyDetector,
+  envFallbackDetector,
+  hardcodedSecretFallbackDetector,
+  localhostFallbackUrlDetector,
 ];

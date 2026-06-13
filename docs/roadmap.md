@@ -56,11 +56,14 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
       file for what could plausibly be a one-liner
 
 ### magic-fallback
-- [ ] `env-fallback` — `process.env.X || default` / `?? default` pattern
-- [ ] `hardcoded-secret-fallback` — fallback value for a secret/credential
+- [x] `env-fallback` — `process.env.X || default` / `?? default` pattern
+- [x] `hardcoded-secret-fallback` — fallback value for a secret/credential
       that looks like a literal (not read from config)
-- [ ] `localhost-fallback-url` — fallback URL pointing at `localhost` /
+- [x] `localhost-fallback-url` — fallback URL pointing at `localhost` /
       `127.0.0.1`
+- Known gaps (phase 1): Python `os.environ`, destructuring defaults
+  (`const { PORT = 3000 } = process.env`). Central-config-module bypass
+  (env access outside the repo's config module) is convention-drift territory.
 
 ### error-fog
 - [ ] `empty-catch` — catch block with no body or comment-only body

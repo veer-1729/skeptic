@@ -1,0 +1,9 @@
+[
+  {
+    "category": "magic-fallback",
+    "ruleId": "env-fallback",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "medium"
+  }
+]
