@@ -18,9 +18,9 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 
 ### type-anesthesia
 - [x] `as-any-cast` — `expr as any`
-- [ ] `ts-ignore-unexplained` — `@ts-ignore` / `@ts-expect-error` with no
+- [x] `ts-ignore-unexplained` — `@ts-ignore` / `@ts-expect-error` with no
       explanatory comment on the same or preceding line
-- [ ] `non-null-assertion-near-nullable` — `!` applied to a value that was
+- [x] `non-null-assertion-near-nullable` — `!` applied to a value that was
       typed/declared as nullable a few lines earlier in the same function
 
 ### phantom-dependency
