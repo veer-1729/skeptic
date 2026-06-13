@@ -1,0 +1,9 @@
+[
+  {
+    "category": "error-fog",
+    "ruleId": "broad-catch-generic-500",
+    "lineStart": 4,
+    "lineEnd": 4,
+    "severity": "medium"
+  }
+]

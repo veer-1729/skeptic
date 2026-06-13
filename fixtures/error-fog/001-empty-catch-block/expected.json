@@ -1,0 +1,9 @@
+[
+  {
+    "category": "error-fog",
+    "ruleId": "empty-catch",
+    "lineStart": 4,
+    "lineEnd": 4,
+    "severity": "medium"
+  }
+]

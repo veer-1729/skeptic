@@ -13,6 +13,9 @@ import { lowTrustNewDependencyDetector } from "./phantom-dependency/low-trust-ne
 import { envFallbackDetector } from "./magic-fallback/env-fallback.js";
 import { hardcodedSecretFallbackDetector } from "./magic-fallback/hardcoded-secret-fallback.js";
 import { localhostFallbackUrlDetector } from "./magic-fallback/localhost-fallback-url.js";
+import { emptyCatchDetector } from "./error-fog/empty-catch.js";
+import { broadCatchGeneric500Detector } from "./error-fog/broad-catch-generic-500.js";
+import { swallowedPromiseRejectionDetector } from "./error-fog/swallowed-promise-rejection.js";
 
 /**
  * Detector registry. Add each new detector here as it's implemented —
@@ -34,4 +37,7 @@ export const detectors: Detector[] = [
   envFallbackDetector,
   hardcodedSecretFallbackDetector,
   localhostFallbackUrlDetector,
+  emptyCatchDetector,
+  broadCatchGeneric500Detector,
+  swallowedPromiseRejectionDetector,
 ];
