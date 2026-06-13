@@ -49,10 +49,10 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 - [x] `new-todo-in-diff` — new `TODO`/`FIXME`/`XXX` comment on changed lines
 
 ### dependency-creep
-- [ ] `overlapping-dependency` — new manifest entry overlaps functionally
+- [x] `overlapping-dependency` — new manifest entry overlaps functionally
       with an existing dependency (start with a small hardcoded overlap
       table: date libs, HTTP clients, etc. — see taxonomy doc category 6)
-- [ ] `single-use-new-dependency` — new dependency imported in exactly one
+- [x] `single-use-new-dependency` — new dependency imported in exactly one
       file for what could plausibly be a one-liner
 
 ### magic-fallback

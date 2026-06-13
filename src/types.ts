@@ -120,7 +120,18 @@ export interface Detector {
   /** Stable identifier, referenced by fixtures and reports. */
   id: string;
   category: SlopCategory;
-  run(input: DetectorInput): Finding[];
+  /**
+   * Per-file detection: called once for each changed file. This is the fast
+   * path most detectors use — it sees one file and never its siblings.
+   */
+  run?(input: DetectorInput): Finding[];
+  /**
+   * Whole-diff detection: called once with every file in the analysis unit.
+   * For findings that require a cross-file view (e.g. "this new dependency is
+   * imported in exactly one file across the diff"). A detector implements
+   * `run`, `runProject`, or both. The harness runs each independently.
+   */
+  runProject?(inputs: DetectorInput[]): Finding[];
 }
 
 /**

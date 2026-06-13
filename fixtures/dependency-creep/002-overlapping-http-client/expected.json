@@ -1,0 +1,9 @@
+[
+  {
+    "category": "dependency-creep",
+    "ruleId": "overlapping-dependency",
+    "lineStart": 4,
+    "lineEnd": 4,
+    "severity": "medium"
+  }
+]

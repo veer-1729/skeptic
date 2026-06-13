@@ -1,0 +1,9 @@
+[
+  {
+    "category": "dependency-creep",
+    "ruleId": "single-use-new-dependency",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "medium"
+  }
+]
