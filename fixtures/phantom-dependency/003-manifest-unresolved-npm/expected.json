@@ -1,0 +1,9 @@
+[
+  {
+    "category": "phantom-dependency",
+    "ruleId": "manifest-unresolved-dependency",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "severity": "high"
+  }
+]

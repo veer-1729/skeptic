@@ -1,0 +1,6 @@
+{
+  "packages": {
+    "known": ["requests", "flask", "django"]
+  },
+  "addedRanges": [{ "start": 2, "end": 2 }]
+}

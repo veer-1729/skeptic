@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "known": ["lodash", "niche-helper-lib"],
+    "registry": {
+      "niche-helper-lib": {
+        "resolves": true,
+        "publishedDaysAgo": 900,
+        "weeklyDownloads": 8,
+        "hasSourceRepo": true
+      }
+    }
+  },
+  "addedRanges": [{ "start": 6, "end": 6 }]
+}

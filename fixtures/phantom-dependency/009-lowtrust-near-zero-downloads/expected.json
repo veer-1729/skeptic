@@ -1,0 +1,9 @@
+[
+  {
+    "category": "phantom-dependency",
+    "ruleId": "low-trust-new-dependency",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "severity": "medium"
+  }
+]

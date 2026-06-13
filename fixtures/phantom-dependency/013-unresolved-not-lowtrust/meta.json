@@ -1,0 +1,6 @@
+{
+  "packages": {
+    "known": ["lodash", "react", "zod"]
+  },
+  "addedRanges": [{ "start": 6, "end": 6 }]
+}

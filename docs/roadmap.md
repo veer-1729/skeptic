@@ -25,20 +25,28 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 
 ### phantom-dependency
 - [x] `unresolved-import` — import of a package not in the known-package set
-- [ ] `manifest-unresolved-dependency` — package.json/requirements.txt entry
+- [x] `manifest-unresolved-dependency` — package.json/requirements.txt entry
       that doesn't resolve against the known-package set
-- [ ] `low-trust-new-dependency` — resolves, but flagged via metadata as
-      new/low-downloads/no-source-repo (fixtures can mock this via meta.json
-      the same way `knownPackages` works today)
+- [x] `low-trust-new-dependency` — resolves, but flagged via metadata as
+      new/low-downloads/no-source-repo (`RegistryInfo` in `src/types.ts` now
+      carries `publishedDaysAgo`, `weeklyDownloads`, and `hasSourceRepo` —
+      the speculative trim from the harness schema change is closed)
 
 ### dead-leftovers
-- [ ] `debug-console-log` — `console.log`/`print`-style debug statement
+- [x] `debug-console-log` — `console.log`/`print`-style debug statement
       added in the diff
-- [ ] `unused-export` — new export with zero references within the file
-      (repo-wide reference checking is a phase-3 concern; file-local is fine
-      for phase 1)
-- [ ] `commented-out-code` — a block of commented-out code added in the diff
-- [ ] `new-todo-in-diff` — new `TODO`/`FIXME`/`XXX` comment on changed lines
+- [ ] `unused-export` — deferred to phase 3 (needs repo-wide reference data).
+      Unlike the other three rules in this category, the file-local "zero
+      references" approximation is *unsound* for exported symbols: `export`
+      means "for cross-file use," so being unreferenced within its own file is
+      the normal case, not a leftover signal — a file-local detector fires on
+      essentially every export. Resolving it requires knowing whether any other
+      file imports the symbol, which doesn't exist until the repo-context
+      infrastructure lands. (The other three rules — `debug-console-log`,
+      `commented-out-code`, `new-todo-in-diff` — are genuinely diff-local
+      signals, so file-local detection is correct for them.)
+- [x] `commented-out-code` — a block of commented-out code added in the diff
+- [x] `new-todo-in-diff` — new `TODO`/`FIXME`/`XXX` comment on changed lines
 
 ### dependency-creep
 - [x] `overlapping-dependency` — new manifest entry overlaps functionally

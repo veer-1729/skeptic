@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "known": ["lodash", "zod"],
+    "registry": {
+      "zod": {
+        "resolves": true,
+        "publishedDaysAgo": 900,
+        "weeklyDownloads": 5000000,
+        "hasSourceRepo": true
+      }
+    }
+  },
+  "addedRanges": [{ "start": 6, "end": 6 }]
+}
