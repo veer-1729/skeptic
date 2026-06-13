@@ -1,0 +1,9 @@
+[
+  {
+    "category": "phantom-dependency",
+    "ruleId": "unresolved-import",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "high"
+  }
+]

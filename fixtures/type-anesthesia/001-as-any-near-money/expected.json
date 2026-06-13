@@ -1,0 +1,9 @@
+[
+  {
+    "category": "type-anesthesia",
+    "ruleId": "as-any-cast",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "severity": "high"
+  }
+]
