@@ -10,6 +10,12 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 
 ## Phase 1 — Mechanical detector (Tier A/B, diff-only, no repo index)
 
+### harness
+- [ ] remove the legacy flat-meta adapter in `src/harness/fixtures.ts` once the
+      `meta.json` fixtures migrate to the nested `AnalysisMeta` shape (the
+      adapter is a deliberate temporary so the schema change landed without
+      touching fixtures — see `docs/harness-design-notes.md`)
+
 ### type-anesthesia
 - [x] `as-any-cast` — `expr as any`
 - [ ] `ts-ignore-unexplained` — `@ts-ignore` / `@ts-expect-error` with no
