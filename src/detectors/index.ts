@@ -2,6 +2,8 @@ import type { Detector } from "../types.js";
 import { asAnyCastDetector } from "./type-anesthesia/as-any-cast.js";
 import { tsIgnoreUnexplainedDetector } from "./type-anesthesia/ts-ignore-unexplained.js";
 import { nonNullAssertionNearNullableDetector } from "./type-anesthesia/non-null-assertion-near-nullable.js";
+import { debugConsoleLogDetector } from "./dead-leftovers/debug-console-log.js";
+import { newTodoInDiffDetector } from "./dead-leftovers/new-todo-in-diff.js";
 import { unresolvedImportDetector } from "./phantom-dependency/unresolved-import.js";
 
 /**
@@ -13,5 +15,7 @@ export const detectors: Detector[] = [
   asAnyCastDetector,
   tsIgnoreUnexplainedDetector,
   nonNullAssertionNearNullableDetector,
+  debugConsoleLogDetector,
+  newTodoInDiffDetector,
   unresolvedImportDetector,
 ];

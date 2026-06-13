@@ -32,13 +32,13 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
       the same way `knownPackages` works today)
 
 ### dead-leftovers
-- [ ] `debug-console-log` — `console.log`/`print`-style debug statement
+- [x] `debug-console-log` — `console.log`/`print`-style debug statement
       added in the diff
 - [ ] `unused-export` — new export with zero references within the file
       (repo-wide reference checking is a phase-3 concern; file-local is fine
       for phase 1)
 - [ ] `commented-out-code` — a block of commented-out code added in the diff
-- [ ] `new-todo-in-diff` — new `TODO`/`FIXME`/`XXX` comment on changed lines
+- [x] `new-todo-in-diff` — new `TODO`/`FIXME`/`XXX` comment on changed lines
 
 ### dependency-creep
 - [ ] `overlapping-dependency` — new manifest entry overlaps functionally
