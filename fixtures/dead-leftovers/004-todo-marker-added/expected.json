@@ -1,0 +1,9 @@
+[
+  {
+    "category": "dead-leftovers",
+    "ruleId": "new-todo-in-diff",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "low"
+  }
+]

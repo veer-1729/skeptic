@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
-import type { AnalysisMeta, DetectorInput, ExpectedFinding } from "../types.js";
+import type { AnalysisMeta, DetectorInput, ExpectedFinding, LineRange } from "../types.js";
 
 export interface Fixture {
   category: string;
@@ -36,27 +36,45 @@ function adaptMeta(raw: Record<string, unknown>): AnalysisMeta {
 }
 
 /**
- * Splits a raw meta.json into shared meta (top-level keys, applied to every
- * input file) and per-file overrides (under an optional `files` map keyed by
- * input filename, merged over the shared meta).
+ * `addedRanges` is a sibling of AnalysisMeta, not part of it — the diff a
+ * detector sees, not contextual config. It's read here separately and never
+ * routed through adaptMeta, so it can't leak into `meta`.
  */
-function loadMeta(raw: Record<string, unknown> | undefined): {
-  shared: AnalysisMeta;
-  perFile: Record<string, AnalysisMeta>;
-} {
-  if (!raw) return { shared: {}, perFile: {} };
+function readAddedRanges(raw: Record<string, unknown>): LineRange[] | undefined {
+  return raw.addedRanges as LineRange[] | undefined;
+}
+
+interface FixtureContext {
+  sharedMeta: AnalysisMeta;
+  perFileMeta: Record<string, AnalysisMeta>;
+  sharedAdded?: LineRange[];
+  perFileAdded: Record<string, LineRange[] | undefined>;
+}
+
+/**
+ * Splits a raw meta.json into shared values (top-level keys, applied to every
+ * input file) and per-file overrides (under an optional `files` map keyed by
+ * input filename, merged over / replacing the shared values). Both `meta` and
+ * `addedRanges` follow the same shared-plus-override shape.
+ */
+function loadContext(raw: Record<string, unknown> | undefined): FixtureContext {
+  if (!raw) return { sharedMeta: {}, perFileMeta: {}, perFileAdded: {} };
 
   const { files, ...top } = raw;
-  const shared = adaptMeta(top);
-  const perFile: Record<string, AnalysisMeta> = {};
+  const sharedMeta = adaptMeta(top);
+  const sharedAdded = readAddedRanges(top);
+  const perFileMeta: Record<string, AnalysisMeta> = {};
+  const perFileAdded: Record<string, LineRange[] | undefined> = {};
 
   if (files && typeof files === "object") {
     for (const [name, override] of Object.entries(files as Record<string, unknown>)) {
-      perFile[name] = adaptMeta((override as Record<string, unknown>) ?? {});
+      const obj = (override as Record<string, unknown>) ?? {};
+      perFileMeta[name] = adaptMeta(obj);
+      perFileAdded[name] = readAddedRanges(obj);
     }
   }
 
-  return { shared, perFile };
+  return { sharedMeta, perFileMeta, sharedAdded, perFileAdded };
 }
 
 /**
@@ -91,15 +109,23 @@ export function loadFixtures(fixturesDir: string): Fixture[] {
       const rawMeta = existsSync(metaPath)
         ? (JSON.parse(readFileSync(metaPath, "utf-8")) as Record<string, unknown>)
         : undefined;
-      const { shared, perFile } = loadMeta(rawMeta);
+      const { sharedMeta, perFileMeta, sharedAdded, perFileAdded } = loadContext(rawMeta);
 
       const inputs: DetectorInput[] = readdirSync(dir)
         .filter((f) => f.startsWith("input."))
-        .map((f) => ({
-          file: f,
-          content: readFileSync(join(dir, f), "utf-8"),
-          meta: { ...shared, ...(perFile[f] ?? {}) },
-        }));
+        .map((f) => {
+          // Per-file addedRanges overrides shared only when explicitly set
+          // (matching how meta inherits unspecified shared keys); absent ⇒
+          // undefined ⇒ detectors treat the whole file as added (the phase-1
+          // default documented on DetectorInput).
+          const addedRanges = perFileAdded[f] ?? sharedAdded;
+          return {
+            file: f,
+            content: readFileSync(join(dir, f), "utf-8"),
+            meta: { ...sharedMeta, ...(perFileMeta[f] ?? {}) },
+            ...(addedRanges ? { addedRanges } : {}),
+          };
+        });
 
       if (inputs.length === 0) {
         throw new Error(`Fixture ${category}/${name} has no input.* file`);

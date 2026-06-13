@@ -1,0 +1,9 @@
+[
+  {
+    "category": "dead-leftovers",
+    "ruleId": "debug-console-log",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "low"
+  }
+]
