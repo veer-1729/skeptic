@@ -1,0 +1,9 @@
+diff --git a/src/app.ts b/src/app.ts
+index 1111111..2222222 100644
+--- a/src/app.ts
++++ b/src/app.ts
+@@ -2,2 +2,4 @@ export function app() {
+ const a = 1;
++const b = 2;
++const c = 3;
+ const d = 4;

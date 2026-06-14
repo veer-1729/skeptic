@@ -15,6 +15,13 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
       `meta.json` fixtures migrate to the nested `AnalysisMeta` shape (the
       adapter is a deliberate temporary so the schema change landed without
       touching fixtures — see `docs/harness-design-notes.md`)
+- [x] CLI-glue coverage — `npm test` now also runs `src/harness/cli-checks.ts`:
+      data-driven unified-diff parser cases (`cli-fixtures/diff/`) + a hermetic
+      temp-repo exercise of `cli/load-repo.ts` (the parse-diff → build-inputs →
+      addedRanges path). Fixed two `parseUnifiedDiff` bugs it surfaced:
+      `\ No newline at end of file` was advancing the new-file line counter, and
+      an in-hunk `+++`/`---` guard was dropping added lines whose content starts
+      with `++ `.
 
 ### type-anesthesia
 - [x] `as-any-cast` — `expr as any`

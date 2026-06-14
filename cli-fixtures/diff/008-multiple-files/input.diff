@@ -1,0 +1,14 @@
+diff --git a/src/one.ts b/src/one.ts
+index aaa..bbb 100644
+--- a/src/one.ts
++++ b/src/one.ts
+@@ -1,1 +1,2 @@
+ const a = 1;
++const b = 2;
+diff --git a/src/two.ts b/src/two.ts
+index ccc..ddd 100644
+--- a/src/two.ts
++++ b/src/two.ts
+@@ -5,1 +5,2 @@
+ const c = 3;
++const d = 4;

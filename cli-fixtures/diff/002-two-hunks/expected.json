@@ -1,0 +1,9 @@
+[
+  {
+    "path": "src/util.ts",
+    "addedRanges": [
+      { "start": 2, "end": 2 },
+      { "start": 12, "end": 12 }
+    ]
+  }
+]

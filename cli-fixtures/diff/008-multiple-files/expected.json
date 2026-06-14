@@ -1,0 +1,4 @@
+[
+  { "path": "src/one.ts", "addedRanges": [{ "start": 2, "end": 2 }] },
+  { "path": "src/two.ts", "addedRanges": [{ "start": 6, "end": 6 }] }
+]

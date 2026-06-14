@@ -53,14 +53,25 @@ export function parseUnifiedDiff(diff: string): ParsedDiffFile[] {
         continue;
       }
       if (!inHunk) continue;
-      if (line.startsWith("+++") || line.startsWith("---")) continue;
+      // `--- a/x` / `+++ b/x` headers only appear *before* the first hunk, where
+      // `!inHunk` already skipped them — so no guard for them is needed here, and
+      // a guard on `+++`/`---` would wrongly drop a genuine added line whose
+      // content begins with `++ ` / `-- ` (it shows up as `+++…` / `---…`).
+
+      if (line.startsWith("\\")) {
+        // "\ No newline at end of file" — patch metadata, not a content line. It
+        // must NOT advance the new-file counter (doing so shifts every later
+        // added line by one when it follows a deletion/addition mid-hunk).
+        continue;
+      }
 
       if (line.startsWith("+")) {
         addedLines.push(newLine);
         newLine++;
       } else if (line.startsWith("-")) {
         // removed from old file — does not advance new-file line counter
-      } else if (line.startsWith(" ") || line.startsWith("\\")) {
+      } else if (line.startsWith(" ")) {
+        // context line — present in both sides, advances the new-file counter
         newLine++;
       }
     }

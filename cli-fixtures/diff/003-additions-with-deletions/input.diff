@@ -1,0 +1,10 @@
+diff --git a/src/calc.ts b/src/calc.ts
+index aaa..bbb 100644
+--- a/src/calc.ts
++++ b/src/calc.ts
+@@ -1,4 +1,4 @@
+ const a = 1;
+-const old = 2;
++const neo = 2;
+ const c = 3;
+ const d = 4;

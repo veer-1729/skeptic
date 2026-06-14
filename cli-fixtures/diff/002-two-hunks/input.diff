@@ -1,0 +1,11 @@
+diff --git a/src/util.ts b/src/util.ts
+index aaa..bbb 100644
+--- a/src/util.ts
++++ b/src/util.ts
+@@ -1,1 +1,2 @@
+ import x from "x";
++import y from "y";
+@@ -10,2 +11,3 @@ function f() {
+ const p = 1;
++const q = 2;
+ const r = 3;
