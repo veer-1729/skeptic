@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "tsx src/harness/runner.ts && tsx src/harness/cli-checks.ts",
+    "test": "tsx src/harness/runner.ts && tsx src/harness/cli-checks.ts && tsx src/harness/adjudication-eval.ts",
     "test:detectors": "tsx src/harness/runner.ts",
     "test:cli": "tsx src/harness/cli-checks.ts",
+    "test:adjudication": "tsx src/harness/adjudication-eval.ts",
     "scan": "tsx src/cli/scan.ts"
   },
   "devDependencies": {

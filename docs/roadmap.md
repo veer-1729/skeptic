@@ -153,12 +153,27 @@ Layer-C convention drift: shared profile machinery + four signals shipped.
 
 ## Phase 4 — Adjudication step
 
-- [ ] citation-constrained verdict schema (every output requires a valid
-      file/line reference or is rejected)
-- [ ] `shallow-edge-handling` (ambiguous cases needing reasoning)
-- [ ] `comment-compliance`
-- [ ] rubric-based eval set for adjudicator quality (separate from the
-      mechanical fixture suite)
+Infrastructure + mechanical Tier-A detectors for shallow-edge and
+comment-compliance keyword pre-filter. Live LLM provider deferred.
+
+- [x] citation-constrained verdict schema + citation validator
+      (`src/adjudication/validate-citation.ts`; types in `src/types.ts`)
+- [x] `Adjudicator` seam + `MockAdjudicator` + `adjudicateFindings` orchestrator
+      (`src/adjudication/`)
+- [x] rubric-based adjudication eval harness — `adjudication-eval/` +
+      `npm run test:adjudication` (wired into `npm test`); 5 seed cases
+- [x] `shallow-edge-handling` mechanical rules (21 fixtures, 001–021):
+      `float-money-math`, `naive-name-split`, `unguarded-array-index`
+      (`src/context/edge-patterns.ts`)
+- [x] `comment-compliance` mechanical pre-filter — `comment-guarantee-without-guard`
+      (7 fixtures; `src/context/comment-guarantees.ts`)
+- [x] CLI `--adjudicate` stub — runs mock adjudicator seam, prints
+      "live adjudicator not configured"
+- [ ] live LLM adjudicator provider (OpenAI/Anthropic) — fast follow
+- [ ] full semantic comment-compliance ("does the WHERE clause actually
+      enforce ownership?") — needs live adjudicator
+- Deferred shallow-edge rules: timezone-naive dates, `.includes()` validation
+      overlap with convention-drift
 
 ## Phase 5 — Session slop detector
 

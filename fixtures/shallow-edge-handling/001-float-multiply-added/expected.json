@@ -1,0 +1,9 @@
+[
+  {
+    "category": "shallow-edge-handling",
+    "ruleId": "float-money-math",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "medium"
+  }
+]

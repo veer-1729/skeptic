@@ -70,6 +70,54 @@ export interface RankedFinding extends Finding {
   correlatedWith?: string[];
 }
 
+/** A file/line reference cited as evidence in an adjudication verdict. */
+export interface Citation {
+  file: string;
+  lineStart: number;
+  lineEnd: number;
+  excerpt?: string;
+}
+
+export type VerdictOutcome = "confirmed" | "rejected" | "needs_review";
+
+/** Identity of the finding an adjudicator judged. */
+export interface FindingRef {
+  category: SlopCategory;
+  ruleId: string;
+  file: string;
+  lineStart: number;
+  lineEnd: number;
+}
+
+/**
+ * Citation-constrained verdict from the adjudication step (architecture §3.6).
+ * A `confirmed` or `needs_review` verdict must carry at least one valid citation
+ * inside the analysis unit — unsupported claims are rejected by validation.
+ */
+export interface AdjudicationVerdict {
+  findingRef: FindingRef;
+  outcome: VerdictOutcome;
+  citations: Citation[];
+  rationale: string;
+  proposedFix?: string;
+}
+
+/** What the adjudicator receives for one ranked finding candidate. */
+export interface AdjudicationInput {
+  finding: RankedFinding;
+  taskDescription?: string;
+  /** Source snippet around the finding — lines from the analysis unit. */
+  snippet: string;
+}
+
+/** Expected verdict shape for adjudication-eval rubric cases. */
+export interface ExpectedAdjudicationVerdict {
+  outcome: VerdictOutcome;
+  citationCount?: number;
+  citations?: Citation[];
+  rationaleContains?: string[];
+}
+
 /**
  * Sensitive domains that bump severity. This is the phase-1 domain-proximity
  * shortcut from the architecture doc — it moves to the ranking engine in

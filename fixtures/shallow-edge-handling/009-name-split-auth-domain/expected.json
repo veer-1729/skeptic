@@ -1,0 +1,9 @@
+[
+  {
+    "category": "shallow-edge-handling",
+    "ruleId": "naive-name-split",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "high"
+  }
+]

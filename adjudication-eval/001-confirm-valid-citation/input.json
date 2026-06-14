@@ -1,0 +1,23 @@
+{
+  "finding": {
+    "category": "type-anesthesia",
+    "ruleId": "as-any-cast",
+    "severity": "medium",
+    "file": "src/example.ts",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "message": "Cast to any",
+    "confidence": 0.9,
+    "adjustedSeverity": "medium",
+    "score": 3,
+    "rank": 1,
+    "appliedMultipliers": { "domain": 1, "diffSize": 1 }
+  },
+  "snippet": "const x = value as any;",
+  "unitFiles": [
+    {
+      "file": "src/example.ts",
+      "content": "export function f(v: unknown) {\n  const x = value as any;\n  return x;\n}\n"
+    }
+  ]
+}

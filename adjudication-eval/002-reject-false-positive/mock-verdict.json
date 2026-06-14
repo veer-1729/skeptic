@@ -1,0 +1,12 @@
+{
+  "findingRef": {
+    "category": "dead-leftovers",
+    "ruleId": "debug-console-log",
+    "file": "src/debug.ts",
+    "lineStart": 2,
+    "lineEnd": 2
+  },
+  "outcome": "rejected",
+  "citations": [],
+  "rationale": "Intentional trace logging in a debug-only module referenced by the task."
+}

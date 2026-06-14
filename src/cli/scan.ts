@@ -16,7 +16,10 @@ import { domainForFile } from "../context/domains.js";
 import { parseManifest } from "../context/manifest.js";
 import { rankFindings } from "../ranking/rank.js";
 import { createRepoContext } from "../retrieval/repo-index.js";
-import type { RankedFinding } from "../types.js";
+import { adjudicateFindings, acceptedVerdicts } from "../adjudication/adjudicate.js";
+import { MockAdjudicator } from "../adjudication/mock-adjudicator.js";
+import { unitFilesFromInputs } from "../adjudication/validate-citation.js";
+import type { AdjudicationInput, RankedFinding } from "../types.js";
 import { parseUnifiedDiff } from "./git-diff.js";
 import {
   buildCorpus,
@@ -33,6 +36,7 @@ interface ScanOptions {
   json: boolean;
   keepClone: boolean;
   noFail: boolean;
+  adjudicate: boolean;
 }
 
 function usage(): never {
@@ -45,6 +49,7 @@ Options:
   --json            Emit JSON instead of a text report
   --keep-clone      Keep the temp clone directory (GitHub URLs only)
   --no-fail         Report findings without failing the process (exit 0)
+  --adjudicate      Run the adjudication pipeline (mock provider only; live LLM not configured)
   --help            Show this help
 
 Examples:
@@ -55,7 +60,7 @@ Examples:
 }
 
 function parseArgs(argv: string[]): { target: string; opts: ScanOptions } {
-  const opts: ScanOptions = { top: 25, json: false, keepClone: false, noFail: false };
+  const opts: ScanOptions = { top: 25, json: false, keepClone: false, noFail: false, adjudicate: false };
   const positional: string[] = [];
 
   for (let i = 0; i < argv.length; i++) {
@@ -71,6 +76,10 @@ function parseArgs(argv: string[]): { target: string; opts: ScanOptions } {
     }
     if (arg === "--no-fail") {
       opts.noFail = true;
+      continue;
+    }
+    if (arg === "--adjudicate") {
+      opts.adjudicate = true;
       continue;
     }
     if (arg === "--base") {
@@ -190,7 +199,51 @@ function changedLines(input: { addedRanges?: { start: number; end: number }[]; c
   return input.content.split("\n").length;
 }
 
-function runScan(root: string, opts: ScanOptions): { label: string; findings: RankedFinding[]; changedFiles: number } {
+function snippetForFinding(
+  root: string,
+  finding: RankedFinding,
+): string {
+  try {
+    const content = readRepoFile(root, finding.file);
+    const lines = content.split("\n");
+    const start = Math.max(0, finding.lineStart - 3);
+    const end = Math.min(lines.length, finding.lineEnd + 2);
+    return lines.slice(start, end).join("\n");
+  } catch {
+    return "";
+  }
+}
+
+async function runAdjudicationStub(
+  root: string,
+  findings: RankedFinding[],
+  inputs: { file: string; content: string; addedRanges?: { start: number; end: number }[] }[],
+  top: number,
+): Promise<{ status: string; candidates: number; accepted: number }> {
+  const candidates = findings.slice(0, top);
+  const unit = unitFilesFromInputs(inputs);
+  const adjudicationInputs: AdjudicationInput[] = candidates.map((finding) => ({
+    finding,
+    snippet: snippetForFinding(root, finding),
+  }));
+  const results = await adjudicateFindings(
+    adjudicationInputs,
+    new MockAdjudicator([]),
+    unit,
+  );
+  return {
+    status: "not_configured",
+    candidates: candidates.length,
+    accepted: acceptedVerdicts(results).length,
+  };
+}
+
+function runScan(root: string, opts: ScanOptions): {
+  label: string;
+  findings: RankedFinding[];
+  changedFiles: number;
+  inputs: ReturnType<typeof buildScanInputs>;
+} {
   const { diff, label } = loadDiff(root, opts);
   const parsed = parseUnifiedDiff(diff);
 
@@ -219,7 +272,7 @@ function runScan(root: string, opts: ScanOptions): { label: string; findings: Ra
     totalChangedLines: inputs.reduce((sum, i) => sum + changedLines(i), 0),
   });
 
-  return { label, findings: ranked, changedFiles: inputs.length };
+  return { label, findings: ranked, changedFiles: inputs.length, inputs };
 }
 
 function printReport(
@@ -228,6 +281,7 @@ function printReport(
   findings: RankedFinding[],
   changedFiles: number,
   top: number,
+  adjudication?: { status: string; candidates: number; accepted: number },
 ) {
   console.log(`Skeptic scan — ${target}`);
   console.log(`Diff: ${label} | ${changedFiles} changed file(s) analyzed\n`);
@@ -262,14 +316,25 @@ function printReport(
   if (findings.length > top) {
     console.log(`\n… ${findings.length - top} more finding(s). Use --top to see more.`);
   }
+
+  if (adjudication) {
+    console.log("\n— adjudication —");
+    console.log(
+      `Live adjudicator not configured (${adjudication.status}). ` +
+        `${adjudication.candidates} candidate(s) processed; ${adjudication.accepted} accepted by mock.`,
+    );
+  }
 }
 
-function main() {
+async function main() {
   const { target, opts } = parseArgs(process.argv.slice(2));
   const { root, cleanup } = resolveRepoRoot(target, opts.keepClone);
 
   try {
-    const { label, findings, changedFiles } = runScan(root, opts);
+    const { label, findings, changedFiles, inputs } = runScan(root, opts);
+    const adjudication = opts.adjudicate
+      ? await runAdjudicationStub(root, findings, inputs, opts.top)
+      : undefined;
 
     if (opts.json) {
       console.log(
@@ -279,13 +344,14 @@ function main() {
             diff: label,
             changedFiles,
             findings,
+            adjudication,
           },
           null,
           2,
         ),
       );
     } else {
-      printReport(target, label, findings, changedFiles, opts.top);
+      printReport(target, label, findings, changedFiles, opts.top, adjudication);
     }
 
     process.exit(!opts.noFail && findings.length > 0 ? 1 : 0);
@@ -294,4 +360,7 @@ function main() {
   }
 }
 
-main();
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : err);
+  process.exit(1);
+});

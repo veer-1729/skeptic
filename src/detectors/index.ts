@@ -21,6 +21,10 @@ import { envAccessConventionDriftDetector } from "./convention-drift/env-access-
 import { errorShapeConventionDriftDetector } from "./convention-drift/error-shape-convention-drift.js";
 import { validationConventionDriftDetector } from "./convention-drift/validation-convention-drift.js";
 import { singleUseAbstractionDetector } from "./fake-generality/single-use-abstraction.js";
+import { floatMoneyMathDetector } from "./shallow-edge-handling/float-money-math.js";
+import { naiveNameSplitDetector } from "./shallow-edge-handling/naive-name-split.js";
+import { unguardedArrayIndexDetector } from "./shallow-edge-handling/unguarded-array-index.js";
+import { commentGuaranteeWithoutGuardDetector } from "./comment-compliance/comment-guarantee-without-guard.js";
 
 /**
  * Detector registry. Add each new detector here as it's implemented —
@@ -50,4 +54,8 @@ export const detectors: Detector[] = [
   errorShapeConventionDriftDetector,
   validationConventionDriftDetector,
   singleUseAbstractionDetector,
+  floatMoneyMathDetector,
+  naiveNameSplitDetector,
+  unguardedArrayIndexDetector,
+  commentGuaranteeWithoutGuardDetector,
 ];

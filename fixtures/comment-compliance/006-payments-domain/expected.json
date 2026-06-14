@@ -1,0 +1,9 @@
+[
+  {
+    "category": "comment-compliance",
+    "ruleId": "comment-guarantee-without-guard",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "high"
+  }
+]

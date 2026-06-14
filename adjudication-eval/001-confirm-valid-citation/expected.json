@@ -1,0 +1,10 @@
+{
+  "validationPasses": true,
+  "accepted": true,
+  "verdict": {
+    "outcome": "confirmed",
+    "citationCount": 1,
+    "citations": [{ "file": "src/example.ts", "lineStart": 3, "lineEnd": 3 }],
+    "rationaleContains": ["type checking"]
+  }
+}

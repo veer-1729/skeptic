@@ -1,0 +1,12 @@
+{
+  "findingRef": {
+    "category": "comment-compliance",
+    "ruleId": "comment-guarantee-without-guard",
+    "file": "src/routes/orders.ts",
+    "lineStart": 2,
+    "lineEnd": 2
+  },
+  "outcome": "rejected",
+  "citations": [{ "file": "src/routes/orders.ts", "lineStart": 3, "lineEnd": 3 }],
+  "rationale": "The query filters by userId on the next line — the comment matches the code."
+}

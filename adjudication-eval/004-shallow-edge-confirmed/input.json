@@ -1,0 +1,23 @@
+{
+  "finding": {
+    "category": "shallow-edge-handling",
+    "ruleId": "float-money-math",
+    "severity": "medium",
+    "file": "src/payments/charge.ts",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "message": "Float money math",
+    "confidence": 0.85,
+    "adjustedSeverity": "high",
+    "score": 13.5,
+    "rank": 1,
+    "appliedMultipliers": { "domain": 1.5, "diffSize": 1 }
+  },
+  "snippet": "return Math.round(amount * 100);",
+  "unitFiles": [
+    {
+      "file": "src/payments/charge.ts",
+      "content": "export function toCents(amount: number) {\n  return Math.round(amount * 100);\n}\n"
+    }
+  ]
+}

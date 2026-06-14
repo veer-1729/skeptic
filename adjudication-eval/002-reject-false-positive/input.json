@@ -1,0 +1,24 @@
+{
+  "finding": {
+    "category": "dead-leftovers",
+    "ruleId": "debug-console-log",
+    "severity": "low",
+    "file": "src/debug.ts",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "message": "Debug log",
+    "confidence": 0.8,
+    "adjustedSeverity": "low",
+    "score": 1,
+    "rank": 1,
+    "appliedMultipliers": { "domain": 1, "diffSize": 1 }
+  },
+  "snippet": "console.log('trace', data);",
+  "taskDescription": "Add structured logging migration",
+  "unitFiles": [
+    {
+      "file": "src/debug.ts",
+      "content": "export function trace(data: unknown) {\n  console.log('trace', data);\n}\n"
+    }
+  ]
+}

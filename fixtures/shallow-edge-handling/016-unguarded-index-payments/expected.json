@@ -1,0 +1,9 @@
+[
+  {
+    "category": "shallow-edge-handling",
+    "ruleId": "unguarded-array-index",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "high"
+  }
+]

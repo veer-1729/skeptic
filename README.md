@@ -123,11 +123,14 @@ else. It should be empty.
 
 See `docs/roadmap.md` for the full phase checklist. Highlights:
 
-- **Adjudication step** (phase 4) — citation-constrained LLM judge for
-  ambiguous categories (`comment-compliance`, `shallow-edge-handling`).
+- **Live LLM adjudicator** (phase 4 fast follow) — `--adjudicate` wires the
+  mock seam today; production needs an OpenAI/Anthropic provider for ambiguous
+  cases. Mechanical detectors for `shallow-edge-handling` and
+  `comment-compliance` (keyword pre-filter) are shipped; full semantic
+  comment-compliance stays on the adjudicator.
 - **Session slop detector** (phase 5) — session-trace fixtures and the
   `test-edit-after-failure` / reward-hacking signal.
 - **Live package-registry lookups** for phantom dependencies — fixtures use a
   mock `knownPackages` list in `meta.json`; production should hit npm/PyPI.
-- **Remaining convention-drift signals** beyond logging (validation style,
-  error shape, env access, test style, DB access).
+- **Remaining convention-drift signals** (DB access, test style/location,
+  folder placement) + model-based embedder via the existing seam.

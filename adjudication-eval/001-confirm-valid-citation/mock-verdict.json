@@ -1,0 +1,13 @@
+{
+  "findingRef": {
+    "category": "type-anesthesia",
+    "ruleId": "as-any-cast",
+    "file": "src/example.ts",
+    "lineStart": 3,
+    "lineEnd": 3
+  },
+  "outcome": "confirmed",
+  "citations": [{ "file": "src/example.ts", "lineStart": 3, "lineEnd": 3 }],
+  "rationale": "The cast bypasses type checking on an added line.",
+  "proposedFix": "Narrow the type or add a type guard."
+}

@@ -1,0 +1,9 @@
+{
+  "validationPasses": true,
+  "accepted": true,
+  "verdict": {
+    "outcome": "confirmed",
+    "citationCount": 1,
+    "rationaleContains": ["lossy"]
+  }
+}

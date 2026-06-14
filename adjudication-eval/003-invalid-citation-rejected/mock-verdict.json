@@ -1,0 +1,12 @@
+{
+  "findingRef": {
+    "category": "magic-fallback",
+    "ruleId": "env-fallback",
+    "file": "src/config.ts",
+    "lineStart": 2,
+    "lineEnd": 2
+  },
+  "outcome": "confirmed",
+  "citations": [{ "file": "src/missing.ts", "lineStart": 99, "lineEnd": 99 }],
+  "rationale": "Unsupported citation to a file outside the unit."
+}

@@ -1,0 +1,13 @@
+{
+  "findingRef": {
+    "category": "shallow-edge-handling",
+    "ruleId": "float-money-math",
+    "file": "src/payments/charge.ts",
+    "lineStart": 3,
+    "lineEnd": 3
+  },
+  "outcome": "confirmed",
+  "citations": [{ "file": "src/payments/charge.ts", "lineStart": 3, "lineEnd": 3 }],
+  "rationale": "Multiplying a float amount by 100 for cents is lossy on payment paths.",
+  "proposedFix": "Store and compute in integer cents or use a decimal type."
+}

@@ -1,0 +1,23 @@
+{
+  "finding": {
+    "category": "magic-fallback",
+    "ruleId": "env-fallback",
+    "severity": "medium",
+    "file": "src/config.ts",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "message": "Env fallback",
+    "confidence": 0.7,
+    "adjustedSeverity": "medium",
+    "score": 3,
+    "rank": 1,
+    "appliedMultipliers": { "domain": 1, "diffSize": 1 }
+  },
+  "snippet": "const url = process.env.API_URL || 'http://localhost';",
+  "unitFiles": [
+    {
+      "file": "src/config.ts",
+      "content": "export const config = {\n  url: process.env.API_URL || 'http://localhost',\n};\n"
+    }
+  ]
+}

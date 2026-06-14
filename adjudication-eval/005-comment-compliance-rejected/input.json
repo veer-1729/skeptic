@@ -1,0 +1,23 @@
+{
+  "finding": {
+    "category": "comment-compliance",
+    "ruleId": "comment-guarantee-without-guard",
+    "severity": "medium",
+    "file": "src/routes/orders.ts",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "message": "Comment promises guard without enforcement",
+    "confidence": 0.6,
+    "adjustedSeverity": "medium",
+    "score": 3,
+    "rank": 1,
+    "appliedMultipliers": { "domain": 1, "diffSize": 1 }
+  },
+  "snippet": "// Ensure user can only access their own orders\nreturn db.query('select * from orders where userId = $1', [userId]);",
+  "unitFiles": [
+    {
+      "file": "src/routes/orders.ts",
+      "content": "export function listOrders(userId: string) {\n  // Ensure user can only access their own orders\n  return db.query('select * from orders where userId = $1', [userId]);\n}\n"
+    }
+  ]
+}
