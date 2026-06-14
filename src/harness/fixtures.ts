@@ -1,13 +1,29 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
-import type { AnalysisMeta, DetectorInput, ExpectedFinding, LineRange } from "../types.js";
+import type {
+  AnalysisMeta,
+  DetectorInput,
+  ExpectedFinding,
+  LineRange,
+  NeighborFile,
+  RepoPolicy,
+} from "../types.js";
 
 export interface Fixture {
   category: string;
   name: string;
   dir: string;
+  /** The changed files (the diff) — what detectors actually run on. */
   inputs: DetectorInput[];
   expected: ExpectedFinding[];
+  /** Per-repo ranking overrides from meta.json's top-level `repoPolicy`. */
+  repoPolicy?: RepoPolicy;
+  /**
+   * Repo-context corpus for Layer-C (convention-drift) fixtures: the non-changed
+   * repo files under `repo/`, fed to the retrieval index. Never run through
+   * detectors directly. Absent for ordinary flat (`input.*`) fixtures.
+   */
+  corpus?: NeighborFile[];
 }
 
 /**
@@ -49,6 +65,8 @@ interface FixtureContext {
   perFileMeta: Record<string, AnalysisMeta>;
   sharedAdded?: LineRange[];
   perFileAdded: Record<string, LineRange[] | undefined>;
+  /** Unit-level (whole-fixture) ranking policy — a sibling of meta, not per-file. */
+  repoPolicy?: RepoPolicy;
 }
 
 /**
@@ -63,6 +81,7 @@ function loadContext(raw: Record<string, unknown> | undefined): FixtureContext {
   const { files, ...top } = raw;
   const sharedMeta = adaptMeta(top);
   const sharedAdded = readAddedRanges(top);
+  const repoPolicy = top.repoPolicy as RepoPolicy | undefined;
   const perFileMeta: Record<string, AnalysisMeta> = {};
   const perFileAdded: Record<string, LineRange[] | undefined> = {};
 
@@ -74,16 +93,39 @@ function loadContext(raw: Record<string, unknown> | undefined): FixtureContext {
     }
   }
 
-  return { sharedMeta, perFileMeta, sharedAdded, perFileAdded };
+  return { sharedMeta, perFileMeta, sharedAdded, perFileAdded, repoPolicy };
+}
+
+/** Recursively reads every file under `root`, returning repo-relative paths. */
+function readTree(root: string, rel = ""): { path: string; content: string }[] {
+  const out: { path: string; content: string }[] = [];
+  for (const entry of readdirSync(join(root, rel))) {
+    const relPath = rel ? `${rel}/${entry}` : entry;
+    const abs = join(root, relPath);
+    if (statSync(abs).isDirectory()) {
+      out.push(...readTree(root, relPath));
+    } else {
+      out.push({ path: relPath, content: readFileSync(abs, "utf-8") });
+    }
+  }
+  return out;
 }
 
 /**
- * Loads every fixture under fixturesDir. Expected layout:
+ * Loads every fixture under fixturesDir. Two layouts are supported:
  *
+ * Flat (phase 1/2):
  *   fixtures/<category>/<fixture-name>/
  *     input.<ext>      one or more — the file(s) a detector sees
  *     expected.json    array of ExpectedFinding, [] for "should not fire"
  *     meta.json        optional — domain tags, mock registry data, etc.
+ *
+ * Reference-repo (phase 3, convention-drift):
+ *   fixtures/<category>/<fixture-name>/
+ *     repo/...         a repo tree; files NOT listed in `changed` are corpus
+ *     expected.json    array of ExpectedFinding
+ *     meta.json        must include `changed: [repo-relative paths]` (the diff);
+ *                      per-file meta/addedRanges keyed by repo-relative path
  *
  * Throws on malformed fixtures rather than skipping them — a fixture
  * that can't be loaded is a bug in the fixture, not a 0-finding result.
@@ -109,29 +151,69 @@ export function loadFixtures(fixturesDir: string): Fixture[] {
       const rawMeta = existsSync(metaPath)
         ? (JSON.parse(readFileSync(metaPath, "utf-8")) as Record<string, unknown>)
         : undefined;
-      const { sharedMeta, perFileMeta, sharedAdded, perFileAdded } = loadContext(rawMeta);
+      const { sharedMeta, perFileMeta, sharedAdded, perFileAdded, repoPolicy } =
+        loadContext(rawMeta);
 
+      const buildInput = (file: string, content: string): DetectorInput => {
+        const addedRanges = perFileAdded[file] ?? sharedAdded;
+        return {
+          file,
+          content,
+          meta: { ...sharedMeta, ...(perFileMeta[file] ?? {}) },
+          ...(addedRanges ? { addedRanges } : {}),
+        };
+      };
+
+      // Reference-repo fixture: split the repo/ tree into the changed diff
+      // (what detectors run on) and the context-only corpus (the retrieval set).
+      const repoDir = join(dir, "repo");
+      if (existsSync(repoDir) && statSync(repoDir).isDirectory()) {
+        const changed = (rawMeta?.changed as string[] | undefined) ?? [];
+        if (changed.length === 0) {
+          throw new Error(
+            `Fixture ${category}/${name} has repo/ but no "changed" paths in meta.json`,
+          );
+        }
+        const changedSet = new Set(changed);
+        const tree = readTree(repoDir);
+        const inputs: DetectorInput[] = [];
+        const corpus: NeighborFile[] = [];
+        for (const f of tree) {
+          if (changedSet.has(f.path)) {
+            inputs.push(buildInput(f.path, f.content));
+          } else {
+            corpus.push({
+              path: f.path,
+              content: f.content,
+              ...(perFileMeta[f.path] ? { meta: perFileMeta[f.path] } : {}),
+            });
+          }
+        }
+        const found = new Set(inputs.map((i) => i.file));
+        for (const c of changed) {
+          if (!found.has(c)) {
+            throw new Error(
+              `Fixture ${category}/${name}: changed path "${c}" not found under repo/`,
+            );
+          }
+        }
+        fixtures.push({ category, name, dir, inputs, expected, repoPolicy, corpus });
+        continue;
+      }
+
+      // Per-file addedRanges overrides shared only when explicitly set (matching
+      // how meta inherits unspecified shared keys); absent ⇒ undefined ⇒
+      // detectors treat the whole file as added (the phase-1 default documented
+      // on DetectorInput). `buildInput` encapsulates that inheritance.
       const inputs: DetectorInput[] = readdirSync(dir)
         .filter((f) => f.startsWith("input."))
-        .map((f) => {
-          // Per-file addedRanges overrides shared only when explicitly set
-          // (matching how meta inherits unspecified shared keys); absent ⇒
-          // undefined ⇒ detectors treat the whole file as added (the phase-1
-          // default documented on DetectorInput).
-          const addedRanges = perFileAdded[f] ?? sharedAdded;
-          return {
-            file: f,
-            content: readFileSync(join(dir, f), "utf-8"),
-            meta: { ...sharedMeta, ...(perFileMeta[f] ?? {}) },
-            ...(addedRanges ? { addedRanges } : {}),
-          };
-        });
+        .map((f) => buildInput(f, readFileSync(join(dir, f), "utf-8")));
 
       if (inputs.length === 0) {
         throw new Error(`Fixture ${category}/${name} has no input.* file`);
       }
 
-      fixtures.push({ category, name, dir, inputs, expected });
+      fixtures.push({ category, name, dir, inputs, expected, repoPolicy });
     }
   }
 

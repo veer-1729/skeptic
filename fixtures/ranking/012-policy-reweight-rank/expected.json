@@ -1,0 +1,18 @@
+[
+  {
+    "category": "error-fog",
+    "ruleId": "empty-catch",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "high",
+    "rank": 1
+  },
+  {
+    "category": "type-anesthesia",
+    "ruleId": "as-any-cast",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "medium",
+    "rank": 2
+  }
+]

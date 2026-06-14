@@ -1,0 +1,5 @@
+{
+  "repoPolicy": {
+    "severityOverride": { "empty-catch": "high" }
+  }
+}

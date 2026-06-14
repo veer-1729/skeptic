@@ -23,6 +23,14 @@ export type Severity = "low" | "medium" | "high";
 export interface Finding {
   category: SlopCategory;
   ruleId: string;
+  /**
+   * The detector's *base/intrinsic* severity for this pattern — what the smell
+   * is worth before any diff-level context is applied. Domain proximity and
+   * diff size are NOT folded in here; the ranking engine (`src/ranking/`)
+   * computes the final `adjustedSeverity` from this base. A detector whose
+   * severity is genuinely domain-independent (e.g. an unresolved import is
+   * always "high") just emits that constant as its base.
+   */
   severity: Severity;
   file: string;
   lineStart: number;
@@ -30,6 +38,36 @@ export interface Finding {
   message: string;
   /** 0..1 — how confident the detector is in this specific instance. */
   confidence: number;
+  /**
+   * For convention-drift (Layer C) findings: the repo-relative paths of the
+   * nearest-neighbor files used as the comparison set when deciding "weird for
+   * this repo" (Principle 7 — every convention finding ships its evidence).
+   * Absent for diff-only findings that need no comparison set.
+   */
+  comparisonSet?: string[];
+}
+
+/**
+ * A `Finding` after the ranking engine has applied diff-level context. The
+ * detector output is preserved verbatim (including the base `severity`); the
+ * ranking fields are additive so matching/printing keep working unchanged.
+ */
+export interface RankedFinding extends Finding {
+  /** Final severity after the domain-proximity multiplier (Principle 3). */
+  adjustedSeverity: Severity;
+  /** Numeric rank key: severity points x domain x diff-size multipliers. */
+  score: number;
+  /** 1-based position after sorting by score (1 = most important). */
+  rank: number;
+  /** The multipliers applied, kept for auditability (Principle 6). */
+  appliedMultipliers: { domain: number; diffSize: number };
+  /**
+   * Rule IDs of co-located findings folded into this one by dedup (Principle:
+   * arch §3.5 "merged into a single combined finding"). Present only on a
+   * survivor that absorbed others; the absorbed findings are dropped from the
+   * ranked list. Sorted for deterministic comparison.
+   */
+  correlatedWith?: string[];
 }
 
 /**
@@ -96,6 +134,22 @@ export interface AnalysisMeta {
   secrets?: SecretContext;
 }
 
+/**
+ * Per-repo overrides from the feedback loop (Principle 8): a repo's accumulated
+ * "this rule is noise / this one's the headline" labels, expressed as ranking
+ * inputs. Unit-level (one policy per diff), not per-file detector context, so it
+ * rides on UnitContext rather than AnalysisMeta.
+ */
+export interface RepoPolicy {
+  /** Rule IDs whose findings this repo drops entirely (never ranked/reported). */
+  suppress?: string[];
+  /**
+   * Per-rule base-severity overrides, applied *before* domain proximity so the
+   * proximity bump and diff-size multiplier still compose on top.
+   */
+  severityOverride?: Record<string, Severity>;
+}
+
 /** A 1-based, inclusive range of lines. */
 export interface LineRange {
   start: number;
@@ -116,6 +170,33 @@ export interface DetectorInput {
   meta?: AnalysisMeta;
 }
 
+/**
+ * A repo-context (non-diff) file made available to Layer-C detectors as part of
+ * the comparison set. Carries the repo-relative `path` (so detectors can cite
+ * it in `Finding.comparisonSet`) and its `content`. Never itself produces
+ * findings — it's evidence about "how this repo does things", not changed code.
+ */
+export interface NeighborFile {
+  path: string;
+  content: string;
+  meta?: AnalysisMeta;
+}
+
+/**
+ * The repo-context view handed to Layer-C detectors (`runRepo`). Backed by the
+ * retrieval index (`src/retrieval/`); the detector asks for the nearest
+ * neighbors of a changed file and never touches the index/embeddings directly,
+ * keeping the detector pure and deterministic.
+ */
+export interface RepoContext {
+  /**
+   * The `k` corpus files most similar to `file` (same folder/type/domain),
+   * ranked most- to least-similar with a stable tiebreak. Empty when the repo
+   * has no comparable neighbors — detectors must degrade gracefully (no fire).
+   */
+  nearestNeighbors(file: string, k?: number): NeighborFile[];
+}
+
 export interface Detector {
   /** Stable identifier, referenced by fixtures and reports. */
   id: string;
@@ -132,6 +213,32 @@ export interface Detector {
    * `run`, `runProject`, or both. The harness runs each independently.
    */
   runProject?(inputs: DetectorInput[]): Finding[];
+  /**
+   * Repo-context detection (Tier C): called with the changed files plus a
+   * `RepoContext` for nearest-neighbor retrieval over the rest of the repo.
+   * For convention-drift findings that are statements about "weird for this
+   * repo", not "bad in isolation". Only runs for fixtures/units that carry a
+   * repo corpus; absent it, the detector simply isn't invoked.
+   */
+  runRepo?(inputs: DetectorInput[], repo: RepoContext): Finding[];
+}
+
+/**
+ * Per-diff context the ranking engine needs to turn base-severity findings into
+ * ranked, severity-adjusted ones. Built once per analysis unit (one fixture /
+ * one diff) from the files under analysis — independent of any single detector.
+ */
+export interface UnitContext {
+  /**
+   * Resolve the sensitive domain (if any) for a file. Prefers explicit
+   * `meta.domain`, falling back to path-pattern inference. `undefined` ⇒ the
+   * file isn't in a sensitive domain, so no proximity bump applies.
+   */
+  domainForFile: (file: string) => Domain | undefined;
+  /** Total added/changed lines across the unit — the diff-size signal. */
+  totalChangedLines: number;
+  /** Optional per-repo overrides (suppression, severity reweighting). */
+  repoPolicy?: RepoPolicy;
 }
 
 /**
@@ -147,4 +254,21 @@ export interface ExpectedFinding {
   lineStart: number;
   lineEnd: number;
   severity?: Severity;
+  /**
+   * Ranking-engine assertions (checked only when present). Unlike `severity`,
+   * a mismatch on any of these IS a hard failure — they're the spec for the
+   * ranking behaviors that have no "did it fire" signal of their own.
+   */
+  /** Expected 1-based position in the ranked list. */
+  rank?: number;
+  /** Expected diff-size score multiplier (`appliedMultipliers.diffSize`). */
+  diffSizeMultiplier?: number;
+  /** Expected rule IDs folded into this survivor by dedup (order-insensitive). */
+  correlatedWith?: string[];
+  /**
+   * Expected convention comparison-set members. Asserted as a *subset*: every
+   * listed path must appear in the finding's `comparisonSet` (robust to `k`
+   * and neighbor tie-order). A mismatch is a hard failure.
+   */
+  comparisonSet?: string[];
 }

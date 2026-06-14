@@ -1,7 +1,6 @@
 import ts from "typescript";
 import type { Detector, DetectorInput, Finding } from "../../types.js";
 import { isAdded } from "../../context/diff.js";
-import { isSensitiveDomain } from "../../context/domains.js";
 import { classifyEnvFallback, findEnvFallbacks } from "../../context/env-access.js";
 import { secretNames } from "../../context/secrets.js";
 
@@ -23,7 +22,8 @@ import { secretNames } from "../../context/secrets.js";
  * Known gaps (phase 1): Python `os.environ`, destructuring defaults
  * (`const { PORT = 3000 } = process.env`).
  *
- * Severity: medium; bumped to high on sensitive domains (payments, auth, …).
+ * Severity: emits a base "medium"; the ranking engine bumps it to "high" on
+ * sensitive domains (payments, auth, …) via the domain-proximity multiplier.
  */
 export const envFallbackDetector: Detector = {
   id: "env-fallback",
@@ -48,7 +48,7 @@ export const envFallbackDetector: Detector = {
       findings.push({
         category: "magic-fallback",
         ruleId: "env-fallback",
-        severity: isSensitiveDomain(meta?.domain) ? "high" : "medium",
+        severity: "medium",
         file,
         lineStart: site.line,
         lineEnd: site.line,

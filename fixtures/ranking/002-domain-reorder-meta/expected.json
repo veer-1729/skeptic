@@ -1,0 +1,18 @@
+[
+  {
+    "category": "type-anesthesia",
+    "ruleId": "as-any-cast",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "high",
+    "rank": 1
+  },
+  {
+    "category": "magic-fallback",
+    "ruleId": "localhost-fallback-url",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "high",
+    "rank": 2
+  }
+]

@@ -1,19 +1,16 @@
 import ts from "typescript";
 import type { Detector, Finding } from "../../types.js";
-import { isSensitiveDomain } from "../../context/domains.js";
 
 /**
- * Flags `expr as any`. Severity bumps to "high" when the file carries a
- * sensitive domain tag (payments, auth, ...) — the minimal version of the
- * domain-proximity multiplier from the architecture doc, applied at
- * detection time rather than in the ranking engine. The sensitive-domain
- * set is shared via `context/domains.ts`, not duplicated here.
+ * Flags `expr as any`. Emits a base severity of "medium"; the ranking engine
+ * raises it to "high" for files in a sensitive domain (payments, auth, ...) via
+ * the domain-proximity multiplier — severity is no longer decided here.
  */
 export const asAnyCastDetector: Detector = {
   id: "as-any-cast",
   category: "type-anesthesia",
 
-  run({ file, content, meta }) {
+  run({ file, content }) {
     const findings: Finding[] = [];
     const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
@@ -23,7 +20,7 @@ export const asAnyCastDetector: Detector = {
         findings.push({
           category: "type-anesthesia",
           ruleId: "as-any-cast",
-          severity: isSensitiveDomain(meta?.domain) ? "high" : "medium",
+          severity: "medium",
           file,
           lineStart: line + 1,
           lineEnd: line + 1,

@@ -1,11 +1,11 @@
 import type { ExpectedFinding, Finding } from "../types.js";
 
-export interface MatchResult {
-  matched: { expected: ExpectedFinding; actual: Finding }[];
+export interface MatchResult<T extends Finding = Finding> {
+  matched: { expected: ExpectedFinding; actual: T }[];
   /** Expected findings nothing actual matched — missed detections. */
   falseNegatives: ExpectedFinding[];
   /** Actual findings nothing expected matched — spurious detections. */
-  falsePositives: Finding[];
+  falsePositives: T[];
 }
 
 function overlaps(aStart: number, aEnd: number, bStart: number, bEnd: number): boolean {
@@ -24,9 +24,12 @@ function overlaps(aStart: number, aEnd: number, bStart: number, bEnd: number): b
  * otherwise-matched finding is reported separately as a warning,
  * so retuning severity thresholds doesn't break the suite outright.
  */
-export function matchFindings(actual: Finding[], expected: ExpectedFinding[]): MatchResult {
+export function matchFindings<T extends Finding>(
+  actual: T[],
+  expected: ExpectedFinding[],
+): MatchResult<T> {
   const remainingActual = [...actual];
-  const matched: MatchResult["matched"] = [];
+  const matched: MatchResult<T>["matched"] = [];
   const falseNegatives: ExpectedFinding[] = [];
 
   for (const exp of expected) {

@@ -1,0 +1,11 @@
+[
+  {
+    "category": "magic-fallback",
+    "ruleId": "localhost-fallback-url",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "high",
+    "rank": 1,
+    "correlatedWith": ["as-any-cast"]
+  }
+]

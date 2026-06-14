@@ -1,0 +1,5 @@
+{
+  "repoPolicy": {
+    "suppress": ["empty-catch"]
+  }
+}
