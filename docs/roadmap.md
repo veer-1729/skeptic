@@ -117,30 +117,39 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 
 ## Phase 3 — Convention drift detector
 
-Logging slice landed end-to-end (real retrieval index, one convention shipped).
+Layer-C convention drift: shared profile machinery + four signals shipped.
 
 - [x] repo embedding index (build) — deterministic `LocalLexicalEmbedder`
       (feature-hashed TF) behind an `Embedder` seam + cosine `nearestNeighbors`
       with same-folder/extension boost and stable tiebreak
       (`src/retrieval/embedder.ts`, `src/retrieval/repo-index.ts`). Incremental
       update / caching deferred (build-per-unit is fine for the harness).
-- [x] convention profile extraction — **logging** convention implemented
-      (`fileLoggingStyle` + `loggingProfile` with adherence thresholds,
-      `src/context/conventions/logging.ts`). Other signals (validation style,
-      error shape, env access, test style, DB access pattern) remain.
-- [x] `convention-drift` findings with comparison-set evidence attached —
-      `logging-convention-drift` detector emits `Finding.comparisonSet`
-      (`src/detectors/convention-drift/logging-convention-drift.ts`); ranking
-      layers domain proximity on top unchanged
+- [x] shared convention machinery — generic `ConventionProfile` +
+      `buildProfile` + `isStrongConvention` (`src/context/conventions/profile.ts`);
+      `makeConventionDriftDetector` factory owning the `runRepo` loop
+      (`src/detectors/convention-drift/factory.ts`). Logging refactored onto the
+      factory (no behavior change).
+- [x] `logging-convention-drift` — structured logger vs `console.error`/`.warn`/`.info`
+      (`src/context/conventions/logging.ts`). 6 fixtures (001–006).
+- [x] `env-access-convention-drift` — central config module vs direct
+      `process.env` reads (`src/context/conventions/env-access.ts`;
+      `findEnvReads` factored into `src/context/env-access.ts`). 6 fixtures
+      (007–012).
+- [x] `error-shape-convention-drift` — structured errors (`AppError`, `{ error:
+      { code, message } }`) vs bare `{ message }` / `res.send(...)`
+      (`src/context/conventions/error-shape.ts`). 6 fixtures (013–018).
+- [x] `validation-convention-drift` — schema library (Zod `.parse`) vs
+      hand-rolled `typeof` field guards (`src/context/conventions/validation.ts`).
+      6 fixtures (019–024).
 - [x] fixture format for repo-context fixtures — `repo/` corpus + `changed`
       manifest in `meta.json`, split into changed inputs vs. context-only
-      corpus; flat fixtures unchanged. 6 logging fixtures (2 positive incl. a
-      domain-proximity composition test, 4 negative controls)
+      corpus; flat fixtures unchanged. 24 convention-drift fixtures total.
 - [~] naming convention — generic-suffix profile (`namingProfile` /
       `establishedSuffixes`, `src/context/conventions/naming.ts`) landed as the
-      Layer-C carve-out for `fake-generality/single-use-abstraction`
-- [ ] remaining convention signals (error shape, env access, validation, DB
-      access, placement) + a model-based embedder via the existing seam
+      Layer-C carve-out for `fake-generality/single-use-abstraction`; not yet a
+      standalone naming-drift detector.
+- [ ] remaining convention signals (DB access, test style/location, folder
+      placement) + a model-based embedder via the existing seam
 
 ## Phase 4 — Adjudication step
 

@@ -1,0 +1,20 @@
+[
+  {
+    "category": "convention-drift",
+    "ruleId": "error-shape-convention-drift",
+    "severity": "high",
+    "lineStart": 5,
+    "lineEnd": 5,
+    "rank": 1,
+    "comparisonSet": ["src/payments/charge.ts", "src/payments/refund.ts"]
+  },
+  {
+    "category": "convention-drift",
+    "ruleId": "error-shape-convention-drift",
+    "severity": "medium",
+    "lineStart": 5,
+    "lineEnd": 5,
+    "rank": 2,
+    "comparisonSet": ["src/routes/orders.ts", "src/routes/users.ts"]
+  }
+]

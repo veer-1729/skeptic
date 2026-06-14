@@ -91,7 +91,38 @@ function findEnvVarInSubtree(node: ts.Node): string | undefined {
   return found;
 }
 
-function extractEnvVarName(node: ts.Node): string | undefined {
+export interface EnvRead {
+  envVar: string;
+  /** 1-based line of the `process.env` read. */
+  line: number;
+}
+
+/**
+ * Every direct `process.env.X` / `process.env["X"]` read site in a file.
+ * Shared by magic-fallback (via subtree search) and convention-drift.
+ */
+export function findEnvReads(sourceFile: ts.SourceFile): EnvRead[] {
+  const sites: EnvRead[] = [];
+  const seen = new Set<string>();
+
+  function visit(node: ts.Node) {
+    const envVar = extractEnvVarName(node);
+    if (envVar) {
+      const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+      const key = `${line + 1}:${envVar}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        sites.push({ envVar, line: line + 1 });
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return sites;
+}
+
+export function extractEnvVarName(node: ts.Node): string | undefined {
   if (ts.isPropertyAccessExpression(node)) {
     if (
       ts.isPropertyAccessExpression(node.expression) &&

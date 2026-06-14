@@ -1,0 +1,10 @@
+[
+  {
+    "category": "convention-drift",
+    "ruleId": "error-shape-convention-drift",
+    "severity": "medium",
+    "lineStart": 5,
+    "lineEnd": 5,
+    "comparisonSet": ["src/routes/orders.ts", "src/routes/users.ts"]
+  }
+]

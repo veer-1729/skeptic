@@ -1,0 +1,10 @@
+[
+  {
+    "category": "convention-drift",
+    "ruleId": "env-access-convention-drift",
+    "severity": "medium",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "comparisonSet": ["src/routes/orders.ts", "src/routes/users.ts"]
+  }
+]

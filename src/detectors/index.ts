@@ -17,6 +17,9 @@ import { emptyCatchDetector } from "./error-fog/empty-catch.js";
 import { broadCatchGeneric500Detector } from "./error-fog/broad-catch-generic-500.js";
 import { swallowedPromiseRejectionDetector } from "./error-fog/swallowed-promise-rejection.js";
 import { loggingConventionDriftDetector } from "./convention-drift/logging-convention-drift.js";
+import { envAccessConventionDriftDetector } from "./convention-drift/env-access-convention-drift.js";
+import { errorShapeConventionDriftDetector } from "./convention-drift/error-shape-convention-drift.js";
+import { validationConventionDriftDetector } from "./convention-drift/validation-convention-drift.js";
 import { singleUseAbstractionDetector } from "./fake-generality/single-use-abstraction.js";
 
 /**
@@ -43,5 +46,8 @@ export const detectors: Detector[] = [
   broadCatchGeneric500Detector,
   swallowedPromiseRejectionDetector,
   loggingConventionDriftDetector,
+  envAccessConventionDriftDetector,
+  errorShapeConventionDriftDetector,
+  validationConventionDriftDetector,
   singleUseAbstractionDetector,
 ];

@@ -1,5 +1,12 @@
 import ts from "typescript";
 import type { NeighborFile } from "../../types.js";
+import {
+  buildProfile,
+  isStrongConvention as isStrongProfile,
+  MIN_RELEVANT_NEIGHBORS,
+  STRONG_ADHERENCE,
+  type ConventionProfile,
+} from "./profile.js";
 
 /**
  * How a file does its logging. The convention-drift detector compares a changed
@@ -92,75 +99,64 @@ export function fileLoggingStyle(content: string, fileName = "file.ts"): Logging
   return "none";
 }
 
-export interface LoggingProfile {
-  /** The most common style among neighbors that log at all; `none` if no convention. */
-  dominant: LoggingStyle;
-  /** Fraction of logging neighbors that follow `dominant` (0..1). */
-  adherenceRatio: number;
-  /** Number of neighbors that log at all (the denominator for adherence). */
-  relevant: number;
-  /** Paths of the neighbors that follow `dominant` — the cited comparison set. */
-  sampleFiles: string[];
+export type LoggingProfile = ConventionProfile<LoggingStyle>;
+
+export { MIN_RELEVANT_NEIGHBORS, STRONG_ADHERENCE };
+
+const LOGGING_PRECEDENCE: LoggingStyle[] = ["structured", "console", "print"];
+
+/** Build a logging profile from a set of neighbor files. */
+export function loggingProfile(neighbors: NeighborFile[]): LoggingProfile {
+  return buildProfile(neighbors, fileLoggingStyle, LOGGING_PRECEDENCE, "none");
 }
 
-/**
- * Minimum number of neighbors that actually log before we'll claim a logging
- * convention exists. Below this the repo simply isn't evidence either way.
- */
-export const MIN_RELEVANT_NEIGHBORS = 3;
+/** Does this profile constitute a strong-enough logging convention to flag drift against? */
+export function isStrongConvention(profile: LoggingProfile): boolean {
+  return isStrongProfile(profile, "none");
+}
+
+/** Console methods convention-drift treats as drift when the repo logs via a structured logger. */
+export const DRIFT_CONSOLE_METHODS = new Set(["error", "warn", "info"]);
 
 /**
- * Adherence required to treat the dominant style as *the* convention. Tuned for
- * near-zero false positives (Principle: detector asserts presence, ranking
- * judges severity) — a 0.6-0.8 low-confidence band is a deferred refinement.
+ * If `node` is a drift-worthy logging call, return a label for it
+ * (`console.error` / `print`); otherwise undefined.
  */
-export const STRONG_ADHERENCE = 0.8;
+export function driftCallMethod(node: ts.Node): string | undefined {
+  if (!ts.isCallExpression(node)) return undefined;
+  const callee = node.expression;
 
-/**
- * Build a logging profile from a set of neighbor files. Considers only files
- * that log at all (`style !== none`); among those, finds the most common style,
- * its adherence ratio, and the files exhibiting it. Ties on count are broken by
- * the precedence order `structured > console > print` so the result is
- * deterministic.
- */
-export function loggingProfile(neighbors: NeighborFile[]): LoggingProfile {
-  const PRECEDENCE: LoggingStyle[] = ["structured", "console", "print"];
-  const byStyle = new Map<LoggingStyle, string[]>();
-  let relevant = 0;
-
-  for (const n of neighbors) {
-    const style = fileLoggingStyle(n.content, n.path);
-    if (style === "none") continue;
-    relevant++;
-    const list = byStyle.get(style) ?? [];
-    list.push(n.path);
-    byStyle.set(style, list);
-  }
-
-  let dominant: LoggingStyle = "none";
-  let dominantCount = 0;
-  for (const style of PRECEDENCE) {
-    const count = byStyle.get(style)?.length ?? 0;
-    if (count > dominantCount) {
-      dominant = style;
-      dominantCount = count;
+  if (ts.isPropertyAccessExpression(callee) && ts.isIdentifier(callee.expression)) {
+    if (callee.expression.text === "console" && DRIFT_CONSOLE_METHODS.has(callee.name.text)) {
+      return `console.${callee.name.text}`;
     }
   }
-
-  const sampleFiles = (dominant === "none" ? [] : (byStyle.get(dominant) ?? [])).slice().sort();
-  const adherenceRatio = relevant === 0 ? 0 : dominantCount / relevant;
-
-  return { dominant, adherenceRatio, relevant, sampleFiles };
+  if (ts.isIdentifier(callee) && callee.text === "print") {
+    return "print";
+  }
+  return undefined;
 }
 
-/**
- * Does this profile constitute a strong-enough convention to flag drift against?
- * Requires enough logging neighbors and high adherence to the dominant style.
- */
-export function isStrongConvention(profile: LoggingProfile): boolean {
-  return (
-    profile.relevant >= MIN_RELEVANT_NEIGHBORS &&
-    profile.adherenceRatio >= STRONG_ADHERENCE &&
-    profile.dominant !== "none"
+/** Find all drift-worthy logging call sites in a file. */
+export function findLoggingDriftSites(content: string, fileName: string): { line: number; label: string }[] {
+  const sourceFile = ts.createSourceFile(
+    fileName,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
   );
+  const sites: { line: number; label: string }[] = [];
+
+  const visit = (node: ts.Node) => {
+    const method = driftCallMethod(node);
+    if (method) {
+      const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+      sites.push({ line: line + 1, label: method });
+    }
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return sites;
 }

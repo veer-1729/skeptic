@@ -1,0 +1,7 @@
+diff --git a/src/x.ts b/src/x.ts
+index aaa..bbb 100644
+--- a/src/x.ts
++++ b/src/x.ts
+@@ -3 +3,2 @@
+ const a = 3;
++const b = 4;

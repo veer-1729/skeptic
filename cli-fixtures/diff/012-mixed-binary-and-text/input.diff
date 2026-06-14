@@ -1,0 +1,11 @@
+diff --git a/logo.png b/logo.png
+new file mode 100644
+index 0000000..abc1234
+Binary files /dev/null and b/logo.png differ
+diff --git a/src/y.ts b/src/y.ts
+index aaa..bbb 100644
+--- a/src/y.ts
++++ b/src/y.ts
+@@ -1,1 +1,2 @@
+ const a = 1;
++const b = 2;
