@@ -11,15 +11,17 @@ import { execFileSync } from "child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import { join, resolve } from "path";
+import ts from "typescript";
 import { detectors } from "../detectors/index.js";
+import { functionEnclosingLine } from "../context/comment-guarantees.js";
 import { domainForFile } from "../context/domains.js";
 import { parseManifest } from "../context/manifest.js";
 import { rankFindings } from "../ranking/rank.js";
 import { createRepoContext } from "../retrieval/repo-index.js";
-import { adjudicateFindings, acceptedVerdicts } from "../adjudication/adjudicate.js";
-import { MockAdjudicator } from "../adjudication/mock-adjudicator.js";
+import { adjudicateFindings, acceptedVerdicts, type AdjudicationResult } from "../adjudication/adjudicate.js";
+import { isLiveAdjudicatorConfigured, resolveAdjudicator } from "../adjudication/resolve-adjudicator.js";
 import { unitFilesFromInputs } from "../adjudication/validate-citation.js";
-import type { AdjudicationInput, RankedFinding } from "../types.js";
+import type { AdjudicationInput, AdjudicationVerdict, RankedFinding } from "../types.js";
 import { parseUnifiedDiff } from "./git-diff.js";
 import {
   buildCorpus,
@@ -49,7 +51,7 @@ Options:
   --json            Emit JSON instead of a text report
   --keep-clone      Keep the temp clone directory (GitHub URLs only)
   --no-fail         Report findings without failing the process (exit 0)
-  --adjudicate      Run the adjudication pipeline (mock provider only; live LLM not configured)
+  --adjudicate      Run adjudication on top findings (live LLM when SKEPTIC_ADJUDICATOR_API_KEY is set)
   --help            Show this help
 
 Examples:
@@ -199,13 +201,39 @@ function changedLines(input: { addedRanges?: { start: number; end: number }[]; c
   return input.content.split("\n").length;
 }
 
-function snippetForFinding(
-  root: string,
-  finding: RankedFinding,
-): string {
+/** Largest enclosing-function snippet we'll send; bigger functions fall back to a window. */
+const MAX_SNIPPET_LINES = 60;
+
+/** 1-based [start, end] line range of the function enclosing `line`, if any. */
+function enclosingFunctionRange(
+  content: string,
+  file: string,
+  line: number,
+): { start: number; end: number } | undefined {
+  const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const fn = functionEnclosingLine(sourceFile, line);
+  if (!fn) return undefined;
+  const start = sourceFile.getLineAndCharacterOfPosition(fn.getStart(sourceFile)).line + 1;
+  const end = sourceFile.getLineAndCharacterOfPosition(fn.getEnd()).line + 1;
+  return { start, end };
+}
+
+/**
+ * Source context for adjudication. Prefers the enclosing function (so the
+ * adjudicator can see a guard anywhere in the body — essential for
+ * comment-compliance), capped at {@link MAX_SNIPPET_LINES}; otherwise a small
+ * window around the finding.
+ */
+function snippetForFinding(root: string, finding: RankedFinding): string {
   try {
     const content = readRepoFile(root, finding.file);
     const lines = content.split("\n");
+
+    const fnRange = enclosingFunctionRange(content, finding.file, finding.lineStart);
+    if (fnRange && fnRange.end - fnRange.start + 1 <= MAX_SNIPPET_LINES) {
+      return lines.slice(fnRange.start - 1, fnRange.end).join("\n");
+    }
+
     const start = Math.max(0, finding.lineStart - 3);
     const end = Math.min(lines.length, finding.lineEnd + 2);
     return lines.slice(start, end).join("\n");
@@ -214,27 +242,30 @@ function snippetForFinding(
   }
 }
 
-async function runAdjudicationStub(
+async function runAdjudication(
   root: string,
   findings: RankedFinding[],
   inputs: { file: string; content: string; addedRanges?: { start: number; end: number }[] }[],
   top: number,
-): Promise<{ status: string; candidates: number; accepted: number }> {
+): Promise<{
+  provider: "live" | "mock";
+  candidates: number;
+  accepted: number;
+  results: AdjudicationResult[];
+}> {
   const candidates = findings.slice(0, top);
   const unit = unitFilesFromInputs(inputs);
+  const adjudicator = resolveAdjudicator(unit);
   const adjudicationInputs: AdjudicationInput[] = candidates.map((finding) => ({
     finding,
     snippet: snippetForFinding(root, finding),
   }));
-  const results = await adjudicateFindings(
-    adjudicationInputs,
-    new MockAdjudicator([]),
-    unit,
-  );
+  const results = await adjudicateFindings(adjudicationInputs, adjudicator, unit);
   return {
-    status: "not_configured",
+    provider: isLiveAdjudicatorConfigured() ? "live" : "mock",
     candidates: candidates.length,
     accepted: acceptedVerdicts(results).length,
+    results,
   };
 }
 
@@ -275,13 +306,31 @@ function runScan(root: string, opts: ScanOptions): {
   return { label, findings: ranked, changedFiles: inputs.length, inputs };
 }
 
+function printAdjudicationVerdict(v: AdjudicationVerdict): void {
+  const cite =
+    v.citations.length > 0
+      ? v.citations.map((c) => `${c.file}:${c.lineStart}-${c.lineEnd}`).join(", ")
+      : "(none)";
+  console.log(
+    `  [${v.outcome}] ${v.findingRef.category}/${v.findingRef.ruleId} @ ${v.findingRef.file}:${v.findingRef.lineStart}`,
+  );
+  console.log(`    citations: ${cite}`);
+  console.log(`    ${v.rationale}`);
+  if (v.proposedFix) console.log(`    fix: ${v.proposedFix}`);
+}
+
 function printReport(
   target: string,
   label: string,
   findings: RankedFinding[],
   changedFiles: number,
   top: number,
-  adjudication?: { status: string; candidates: number; accepted: number },
+  adjudication?: {
+    provider: "live" | "mock";
+    candidates: number;
+    accepted: number;
+    results: AdjudicationResult[];
+  },
 ) {
   console.log(`Skeptic scan — ${target}`);
   console.log(`Diff: ${label} | ${changedFiles} changed file(s) analyzed\n`);
@@ -319,10 +368,32 @@ function printReport(
 
   if (adjudication) {
     console.log("\n— adjudication —");
+    if (adjudication.provider === "mock") {
+      console.log(
+        "Live adjudicator not configured — set SKEPTIC_ADJUDICATOR_API_KEY to enable the LLM provider.",
+      );
+    } else {
+      console.log(`Provider: live (${process.env.SKEPTIC_ADJUDICATOR_MODEL ?? "gpt-4o-mini"})`);
+    }
     console.log(
-      `Live adjudicator not configured (${adjudication.status}). ` +
-        `${adjudication.candidates} candidate(s) processed; ${adjudication.accepted} accepted by mock.`,
+      `${adjudication.candidates} candidate(s); ${adjudication.accepted} passed citation validation.`,
     );
+
+    const rejectedValidation = adjudication.results.filter((r) => r.validationErrors.length > 0);
+    if (rejectedValidation.length > 0) {
+      console.log(`${rejectedValidation.length} verdict(s) failed citation validation:`);
+      for (const r of rejectedValidation) {
+        console.log(
+          `  ${r.verdict.findingRef.ruleId} @ ${r.verdict.findingRef.file}:${r.verdict.findingRef.lineStart} — ${r.validationErrors.join("; ")}`,
+        );
+      }
+    }
+
+    const accepted = acceptedVerdicts(adjudication.results);
+    if (accepted.length > 0) {
+      console.log("\nAccepted verdicts:");
+      for (const v of accepted) printAdjudicationVerdict(v);
+    }
   }
 }
 
@@ -333,7 +404,7 @@ async function main() {
   try {
     const { label, findings, changedFiles, inputs } = runScan(root, opts);
     const adjudication = opts.adjudicate
-      ? await runAdjudicationStub(root, findings, inputs, opts.top)
+      ? await runAdjudication(root, findings, inputs, opts.top)
       : undefined;
 
     if (opts.json) {

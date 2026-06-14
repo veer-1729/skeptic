@@ -1,24 +1,23 @@
 {
   "finding": {
-    "category": "dead-leftovers",
-    "ruleId": "debug-console-log",
-    "severity": "low",
-    "file": "src/debug.ts",
-    "lineStart": 2,
-    "lineEnd": 2,
-    "message": "Debug log",
-    "confidence": 0.8,
-    "adjustedSeverity": "low",
-    "score": 1,
+    "category": "type-anesthesia",
+    "ruleId": "non-null-assertion-near-nullable",
+    "severity": "medium",
+    "file": "src/user.ts",
+    "lineStart": 5,
+    "lineEnd": 5,
+    "message": "Non-null assertion on a nullable value",
+    "confidence": 0.7,
+    "adjustedSeverity": "medium",
+    "score": 3,
     "rank": 1,
     "appliedMultipliers": { "domain": 1, "diffSize": 1 }
   },
-  "snippet": "console.log('trace', data);",
-  "taskDescription": "Add structured logging migration",
+  "snippet": "  if (!user) {\n    throw new Error(\"no user\");\n  }\n  return user!.id;",
   "unitFiles": [
     {
-      "file": "src/debug.ts",
-      "content": "export function trace(data: unknown) {\n  console.log('trace', data);\n}\n"
+      "file": "src/user.ts",
+      "content": "export function userId(user: User | null): string {\n  if (!user) {\n    throw new Error(\"no user\");\n  }\n  return user!.id;\n}\n"
     }
   ]
 }

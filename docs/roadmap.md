@@ -154,7 +154,7 @@ Layer-C convention drift: shared profile machinery + four signals shipped.
 ## Phase 4 — Adjudication step
 
 Infrastructure + mechanical Tier-A detectors for shallow-edge and
-comment-compliance keyword pre-filter. Live LLM provider deferred.
+comment-compliance keyword pre-filter, plus live LLM adjudicator.
 
 - [x] citation-constrained verdict schema + citation validator
       (`src/adjudication/validate-citation.ts`; types in `src/types.ts`)
@@ -167,13 +167,21 @@ comment-compliance keyword pre-filter. Live LLM provider deferred.
       (`src/context/edge-patterns.ts`)
 - [x] `comment-compliance` mechanical pre-filter — `comment-guarantee-without-guard`
       (7 fixtures; `src/context/comment-guarantees.ts`)
-- [x] CLI `--adjudicate` stub — runs mock adjudicator seam, prints
-      "live adjudicator not configured"
-- [ ] live LLM adjudicator provider (OpenAI/Anthropic) — fast follow
-- [ ] full semantic comment-compliance ("does the WHERE clause actually
-      enforce ownership?") — needs live adjudicator
-- Deferred shallow-edge rules: timezone-naive dates, `.includes()` validation
-      overlap with convention-drift
+- [x] CLI `--adjudicate` — uses live LLM when `SKEPTIC_ADJUDICATOR_API_KEY` is set,
+      otherwise empty mock + configuration hint
+- [x] live LLM adjudicator provider — `LlmAdjudicator` (OpenAI-compatible API via
+      env: `SKEPTIC_ADJUDICATOR_API_KEY`, `SKEPTIC_ADJUDICATOR_MODEL`,
+      `SKEPTIC_ADJUDICATOR_BASE_URL`); offline unit tests via injected fetch
+      (`npm run test:adjudication:unit`)
+- [x] full semantic comment-compliance — live adjudicator judges ranked B1
+      candidates in BOTH directions: rejects when the code enforces the comment's
+      promise (eval 005) and confirms with a citation when it does not (eval 006).
+      Adjudication snippet is the enclosing function (capped), so a guard anywhere
+      in the body is visible (`snippetForFinding` in `src/cli/scan.ts`).
+- [x] opt-in live eval — `npm run test:adjudication:live` (requires API key; not in CI);
+      6 rubric cases incl. comment-compliance confirm + reject
+- Phase 4.1 (mechanical expansion, not adjudication): timezone-naive dates;
+      `.includes()` validation overlap → extend convention-drift instead
 
 ## Phase 5 — Session slop detector
 

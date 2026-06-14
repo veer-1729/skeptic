@@ -72,3 +72,6 @@ in the session, not a detail.
   `as-any-cast.ts`'s `sensitiveDomains` set) is a known phase-1 shortcut —
   it moves to the ranking engine in phase 2. Don't be surprised by it, don't
   remove it without replacing it.
+- Adjudication: `npm test` uses `MockAdjudicator` only (offline). Live LLM
+  eval is opt-in via `npm run test:adjudication:live` and requires
+  `SKEPTIC_ADJUDICATOR_API_KEY`.

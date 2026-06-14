@@ -1,6 +1,7 @@
 {
   "validationPasses": false,
   "accepted": false,
+  "liveEval": false,
   "verdict": {
     "outcome": "confirmed"
   }

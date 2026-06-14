@@ -3,7 +3,6 @@
   "accepted": true,
   "verdict": {
     "outcome": "rejected",
-    "citationCount": 1,
-    "rationaleContains": ["userId"]
+    "citationCount": 1
   }
 }

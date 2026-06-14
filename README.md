@@ -123,14 +123,29 @@ else. It should be empty.
 
 See `docs/roadmap.md` for the full phase checklist. Highlights:
 
-- **Live LLM adjudicator** (phase 4 fast follow) — `--adjudicate` wires the
-  mock seam today; production needs an OpenAI/Anthropic provider for ambiguous
-  cases. Mechanical detectors for `shallow-edge-handling` and
-  `comment-compliance` (keyword pre-filter) are shipped; full semantic
-  comment-compliance stays on the adjudicator.
 - **Session slop detector** (phase 5) — session-trace fixtures and the
   `test-edit-after-failure` / reward-hacking signal.
 - **Live package-registry lookups** for phantom dependencies — fixtures use a
   mock `knownPackages` list in `meta.json`; production should hit npm/PyPI.
 - **Remaining convention-drift signals** (DB access, test style/location,
   folder placement) + model-based embedder via the existing seam.
+- **Phase 4.1 mechanical shallow-edge expansion** — timezone-naive dates (see
+  roadmap).
+
+### Adjudication (live LLM)
+
+Set `SKEPTIC_ADJUDICATOR_API_KEY` to enable the live provider on scan:
+
+```bash
+export SKEPTIC_ADJUDICATOR_API_KEY=sk-...
+export SKEPTIC_ADJUDICATOR_MODEL=gpt-4o-mini   # optional
+export SKEPTIC_ADJUDICATOR_BASE_URL=https://api.openai.com/v1  # optional
+npm run scan -- . --adjudicate
+```
+
+The adjudicator sends the enclosing function as context, so it can judge
+semantic comment-compliance — confirming when a comment promises a guarantee
+the code does not enforce, and rejecting when the adjacent code does enforce it.
+
+Offline adjudication tests (mock fetch, no network): `npm run test:adjudication:unit`.
+Opt-in live rubric eval (requires API key, not in CI): `npm run test:adjudication:live`.

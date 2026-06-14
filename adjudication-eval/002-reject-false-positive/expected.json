@@ -2,7 +2,6 @@
   "validationPasses": true,
   "accepted": true,
   "verdict": {
-    "outcome": "rejected",
-    "citationCount": 0
+    "outcome": "rejected"
   }
 }

@@ -1,0 +1,12 @@
+{
+  "findingRef": {
+    "category": "comment-compliance",
+    "ruleId": "comment-guarantee-without-guard",
+    "file": "src/routes/orders.ts",
+    "lineStart": 2,
+    "lineEnd": 2
+  },
+  "outcome": "confirmed",
+  "citations": [{ "file": "src/routes/orders.ts", "lineStart": 3, "lineEnd": 3 }],
+  "rationale": "The comment promises users can only access their own orders, but the query selects all orders with no per-user filter, so the promised guarantee is not enforced."
+}

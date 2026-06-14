@@ -8,6 +8,8 @@
     "test:detectors": "tsx src/harness/runner.ts",
     "test:cli": "tsx src/harness/cli-checks.ts",
     "test:adjudication": "tsx src/harness/adjudication-eval.ts",
+    "test:adjudication:unit": "tsx --test src/adjudication/llm-adjudicator.test.ts",
+    "test:adjudication:live": "tsx src/harness/adjudication-eval-live.ts",
     "scan": "tsx src/cli/scan.ts"
   },
   "devDependencies": {

@@ -1,0 +1,23 @@
+{
+  "finding": {
+    "category": "comment-compliance",
+    "ruleId": "comment-guarantee-without-guard",
+    "severity": "medium",
+    "file": "src/routes/orders.ts",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "message": "Comment promises a guarantee but the enclosing function has no matching guard or enforcement.",
+    "confidence": 0.65,
+    "adjustedSeverity": "medium",
+    "score": 3,
+    "rank": 1,
+    "appliedMultipliers": { "domain": 1, "diffSize": 1 }
+  },
+  "snippet": "export function listOrders(userId: string) {\n  // Ensure user can only access their own orders\n  return db.query(\"select * from orders\");\n}",
+  "unitFiles": [
+    {
+      "file": "src/routes/orders.ts",
+      "content": "export function listOrders(userId: string) {\n  // Ensure user can only access their own orders\n  return db.query(\"select * from orders\");\n}\n"
+    }
+  ]
+}
