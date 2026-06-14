@@ -32,6 +32,7 @@ interface ScanOptions {
   top: number;
   json: boolean;
   keepClone: boolean;
+  noFail: boolean;
 }
 
 function usage(): never {
@@ -43,6 +44,7 @@ Options:
   --top <n>         Max findings to print (default: 25)
   --json            Emit JSON instead of a text report
   --keep-clone      Keep the temp clone directory (GitHub URLs only)
+  --no-fail         Report findings without failing the process (exit 0)
   --help            Show this help
 
 Examples:
@@ -53,7 +55,7 @@ Examples:
 }
 
 function parseArgs(argv: string[]): { target: string; opts: ScanOptions } {
-  const opts: ScanOptions = { top: 25, json: false, keepClone: false };
+  const opts: ScanOptions = { top: 25, json: false, keepClone: false, noFail: false };
   const positional: string[] = [];
 
   for (let i = 0; i < argv.length; i++) {
@@ -65,6 +67,10 @@ function parseArgs(argv: string[]): { target: string; opts: ScanOptions } {
     }
     if (arg === "--keep-clone") {
       opts.keepClone = true;
+      continue;
+    }
+    if (arg === "--no-fail") {
+      opts.noFail = true;
       continue;
     }
     if (arg === "--base") {
@@ -282,7 +288,7 @@ function main() {
       printReport(target, label, findings, changedFiles, opts.top);
     }
 
-    process.exit(findings.length > 0 ? 0 : 0);
+    process.exit(!opts.noFail && findings.length > 0 ? 1 : 0);
   } finally {
     cleanup();
   }

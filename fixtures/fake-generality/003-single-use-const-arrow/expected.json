@@ -1,0 +1,8 @@
+[
+  {
+    "category": "fake-generality",
+    "ruleId": "single-use-abstraction",
+    "lineStart": 1,
+    "lineEnd": 1
+  }
+]

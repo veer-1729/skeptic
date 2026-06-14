@@ -122,6 +122,12 @@ export interface SecretContext {
   nameHints?: string[];
 }
 
+/** Fake-generality detector context (naming carve-out, etc.). */
+export interface FakeGeneralityContext {
+  /** When true, mechanical analysis runs via `runRepo` with naming suppress. */
+  namingCarveout?: boolean;
+}
+
 /**
  * Context for one analysis unit, supplied per file. Every field is optional and
  * owned by one concern — a detector reads only its namespace, and a missing
@@ -132,6 +138,7 @@ export interface AnalysisMeta {
   packages?: PackageContext;
   dependencyOverlap?: OverlapTable;
   secrets?: SecretContext;
+  fakeGenerality?: FakeGeneralityContext;
 }
 
 /**

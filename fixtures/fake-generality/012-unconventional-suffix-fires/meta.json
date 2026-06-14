@@ -1,0 +1,4 @@
+{
+  "changed": ["src/services/orderManager.ts"],
+  "fakeGenerality": { "namingCarveout": true }
+}

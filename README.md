@@ -1,8 +1,14 @@
-# Skeptic — detector harness (phase 0)
+# Skeptic — AI slop detector
 
-This is the fixture-based harness described in the architecture doc. It exists
-so that "does this detector work" is a yes/no question with a printed report,
-not a judgment call from reading a diff.
+Skeptic detects AI-shaped risk in code diffs: type anesthesia, phantom
+dependencies, dead leftovers, convention drift, and more (see
+`docs/skeptic-taxonomy.md`). This repo ships three things:
+
+- **Detector harness** — fixture-based tests that make "does this rule work" a
+  yes/no question (`npm test`).
+- **Ranking engine** — domain proximity, diff-size multipliers, dedup, and
+  per-repo policy (`src/ranking/`).
+- **Scan CLI** — run the full pipeline against a real git diff (`npm run scan`).
 
 ## Running it
 
@@ -12,9 +18,28 @@ npm test
 ```
 
 `npm test` runs every detector in `src/detectors/index.ts` against every
-fixture in `fixtures/`, prints a per-fixture PASS/FAIL plus per-category and
-overall precision/recall/F1, and exits non-zero if anything fails. That exit
-code is what CI (and Cursor) should treat as the source of truth.
+fixture in `fixtures/`, ranks the findings, prints a per-fixture PASS/FAIL plus
+per-category and overall precision/recall/F1, and exits non-zero if anything
+fails. That exit code is what CI (and Cursor) should treat as the source of
+truth for the harness.
+
+## Scanning a repo
+
+```
+npm run scan -- https://github.com/org/repo
+npm run scan -- . --base main
+npm run scan -- . --commit HEAD~3..HEAD
+```
+
+The CLI clones (or uses a local checkout), parses the git diff, runs all
+detectors plus the ranking engine, and prints a ranked report. Options:
+
+- `--json` — emit JSON instead of a text report
+- `--top <n>` — cap how many findings to print (default: 25)
+- `--no-fail` — report findings but always exit 0 (disable the CI gate)
+
+By default, `scan` exits **1** when it finds slop and **0** when the diff is
+clean — suitable for GitHub Actions and other CI gates.
 
 ## Layout
 
@@ -25,6 +50,9 @@ src/
     index.ts            registry — add new detectors here
     <category>/
       <rule-id>.ts       one file per detector
+  ranking/              domain proximity, diff-size, dedup, repo policy
+  retrieval/            repo embedding index for convention drift
+  cli/                  scan entrypoint (npm run scan)
   harness/
     fixtures.ts         loads fixtures from fixtures/
     match.ts            matches expected vs actual findings
@@ -35,7 +63,7 @@ fixtures/
     <fixture-name>/
       input.<ext>        one or more files a detector sees
       expected.json      array of findings that SHOULD fire ([] if none)
-      meta.json          optional — domain tags, mock registry data, etc.
+      meta.json          optional — domain tags, mock registry data, repo corpus
 ```
 
 ## Adding a detector for a new rule
@@ -49,8 +77,7 @@ fixtures/
    code — they're what "done" means for this rule.
 
 2. **Run `npm test`.** The new fixtures will fail (MISSING — false negative).
-   This is expected and is the same phase-0 signal: the harness correctly
-   reports "not implemented yet."
+   This is expected: the harness correctly reports "not implemented yet."
 
 3. **Implement the detector** in `src/detectors/<category>/<rule-id>.ts`,
    following the pattern in `as-any-cast.ts` or `unresolved-import.ts`:
@@ -94,10 +121,13 @@ else. It should be empty.
 
 ## What's deliberately not here yet
 
-- Severity/domain multipliers beyond the minimal per-detector tagging shown
-  in `as-any-cast.ts` — these belong in the ranking engine (phase 2).
-- Real package-registry lookups for phantom dependencies — fixtures use a
+See `docs/roadmap.md` for the full phase checklist. Highlights:
+
+- **Adjudication step** (phase 4) — citation-constrained LLM judge for
+  ambiguous categories (`comment-compliance`, `shallow-edge-handling`).
+- **Session slop detector** (phase 5) — session-trace fixtures and the
+  `test-edit-after-failure` / reward-hacking signal.
+- **Live package-registry lookups** for phantom dependencies — fixtures use a
   mock `knownPackages` list in `meta.json`; production should hit npm/PyPI.
-- Multi-file fixtures, repo-context fixtures (convention drift), and
-  session-trace fixtures — these need their own fixture formats, introduced
-  in phases 3 and 5.
+- **Remaining convention-drift signals** beyond logging (validation style,
+  error shape, env access, test style, DB access).

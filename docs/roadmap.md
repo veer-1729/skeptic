@@ -72,6 +72,27 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 - [x] `swallowed-promise-rejection` — `.catch(() => {})` or a clearly
       unawaited promise on a call that can reject
 
+### fake-generality
+- [x] `single-use-abstraction` — a newly-added, module-level
+      function/class/const-fn with exactly **one** call site across the diff
+      (zero = dead code, two-plus = load-bearing; only one is the premature
+      wrapper). Cross-file via `runProject`; call sites counted by name
+      (`src/context/call-sites.ts`), bare references/callbacks deliberately
+      excluded. Layer-C naming carve-out (`runRepo`): suppresses a finding
+      whose generic suffix (`*Service`, `*Manager`, …) the repo already uses
+      widely (`src/context/conventions/naming.ts`), gated by
+      `meta.fakeGenerality.namingCarveout`. Cross-file call counting is
+      import-resolved (a call in another file counts only when imported via a
+      relative specifier resolving to the candidate's module), so a same-named
+      symbol elsewhere in the diff doesn't inflate the count. 14 fixtures (4
+      positive, 6 negative controls, 2 repo-context: conventional-suffix
+      suppressed + unconventional-suffix fires, 2 cross-file same-name
+      attribution controls).
+- Deferred: generic type param instantiated with one concrete type;
+      single-caller options object; task-intent (Layer D) gating. Within a
+      single file, call counting doesn't model inner-scope shadowing (a rare,
+      arguably-its-own-smell case).
+
 ## Phase 2 — Slop ranking engine
 
 - [x] domain-proximity multiplier — config-driven map of path
@@ -108,8 +129,11 @@ Logging slice landed end-to-end (real retrieval index, one convention shipped).
       manifest in `meta.json`, split into changed inputs vs. context-only
       corpus; flat fixtures unchanged. 6 logging fixtures (2 positive incl. a
       domain-proximity composition test, 4 negative controls)
+- [~] naming convention — generic-suffix profile (`namingProfile` /
+      `establishedSuffixes`, `src/context/conventions/naming.ts`) landed as the
+      Layer-C carve-out for `fake-generality/single-use-abstraction`
 - [ ] remaining convention signals (error shape, env access, validation, DB
-      access, naming/placement) + a model-based embedder via the existing seam
+      access, placement) + a model-based embedder via the existing seam
 
 ## Phase 4 — Adjudication step
 

@@ -42,6 +42,8 @@ function adaptMeta(raw: Record<string, unknown>): AnalysisMeta {
   if (raw.dependencyOverlap !== undefined)
     meta.dependencyOverlap = raw.dependencyOverlap as AnalysisMeta["dependencyOverlap"];
   if (raw.secrets !== undefined) meta.secrets = raw.secrets as AnalysisMeta["secrets"];
+  if (raw.fakeGenerality !== undefined)
+    meta.fakeGenerality = raw.fakeGenerality as AnalysisMeta["fakeGenerality"];
 
   // Legacy flat keys → nested namespaces.
   if (raw.knownPackages !== undefined) {

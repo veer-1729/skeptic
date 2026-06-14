@@ -1,0 +1,4 @@
+{
+  "changed": ["src/services/orderService.ts"],
+  "fakeGenerality": { "namingCarveout": true }
+}
