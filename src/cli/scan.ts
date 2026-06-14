@@ -20,7 +20,7 @@ import { rankFindings } from "../ranking/rank.js";
 import { createRepoContext } from "../retrieval/repo-index.js";
 import { adjudicateFindings, acceptedVerdicts, type AdjudicationResult } from "../adjudication/adjudicate.js";
 import { isLiveAdjudicatorConfigured, resolveAdjudicator } from "../adjudication/resolve-adjudicator.js";
-import { unitFilesFromInputs } from "../adjudication/validate-citation.js";
+import { unitFilesForAdjudication } from "../adjudication/validate-citation.js";
 import type { AdjudicationInput, AdjudicationVerdict, RankedFinding } from "../types.js";
 import { parseUnifiedDiff } from "./git-diff.js";
 import {
@@ -254,7 +254,7 @@ async function runAdjudication(
   results: AdjudicationResult[];
 }> {
   const candidates = findings.slice(0, top);
-  const unit = unitFilesFromInputs(inputs);
+  const unit = unitFilesForAdjudication(inputs);
   const adjudicator = resolveAdjudicator(unit);
   const adjudicationInputs: AdjudicationInput[] = candidates.map((finding) => ({
     finding,

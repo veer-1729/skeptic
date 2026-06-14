@@ -1,0 +1,24 @@
+{
+  "finding": {
+    "category": "type-anesthesia",
+    "ruleId": "non-null-assertion-near-nullable",
+    "severity": "medium",
+    "file": "src/user.ts",
+    "lineStart": 5,
+    "lineEnd": 5,
+    "message": "Non-null assertion on a nullable value",
+    "confidence": 0.7,
+    "adjustedSeverity": "medium",
+    "score": 3,
+    "rank": 1,
+    "appliedMultipliers": { "domain": 1, "diffSize": 1 }
+  },
+  "snippet": "export function userId(user: User | null): string {\n  if (!user) {\n    throw new Error(\"no user\");\n  }\n  return user!.id;\n}",
+  "unitFiles": [
+    {
+      "file": "src/user.ts",
+      "content": "export function userId(user: User | null): string {\n  if (!user) {\n    throw new Error(\"no user\");\n  }\n  return user!.id;\n}\n",
+      "addedRanges": [{ "start": 5, "end": 5 }]
+    }
+  ]
+}

@@ -177,9 +177,11 @@ comment-compliance keyword pre-filter, plus live LLM adjudicator.
       candidates in BOTH directions: rejects when the code enforces the comment's
       promise (eval 005) and confirms with a citation when it does not (eval 006).
       Adjudication snippet is the enclosing function (capped), so a guard anywhere
-      in the body is visible (`snippetForFinding` in `src/cli/scan.ts`).
+      in the body is visible (`snippetForFinding` in `src/cli/scan.ts`). Citations
+      may reference any line in the unit — not restricted to added/changed lines
+      (`unitFilesForAdjudication`; eval 007).
 - [x] opt-in live eval — `npm run test:adjudication:live` (requires API key; not in CI);
-      6 rubric cases incl. comment-compliance confirm + reject
+      7 rubric cases incl. comment-compliance confirm/reject + pre-existing guard citation
 - Phase 4.1 (mechanical expansion, not adjudication): timezone-naive dates;
       `.includes()` validation overlap → extend convention-drift instead
 

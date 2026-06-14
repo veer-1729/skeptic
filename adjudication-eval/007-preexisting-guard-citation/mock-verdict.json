@@ -1,0 +1,12 @@
+{
+  "findingRef": {
+    "category": "type-anesthesia",
+    "ruleId": "non-null-assertion-near-nullable",
+    "file": "src/user.ts",
+    "lineStart": 5,
+    "lineEnd": 5
+  },
+  "outcome": "rejected",
+  "citations": [{ "file": "src/user.ts", "lineStart": 2, "lineEnd": 4 }],
+  "rationale": "The guard on lines 2–4 throws when user is null, so the assertion on line 5 is safe."
+}

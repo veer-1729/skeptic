@@ -1,0 +1,9 @@
+{
+  "validationPasses": true,
+  "accepted": true,
+  "verdict": {
+    "outcome": "rejected",
+    "citationCount": 1,
+    "citations": [{ "file": "src/user.ts", "lineStart": 2, "lineEnd": 4 }]
+  }
+}

@@ -19,6 +19,19 @@ export function unitFilesFromInputs(
   return { files };
 }
 
+/**
+ * Unit map for adjudication citation validation.
+ *
+ * Adjudication may cite any line in the analysis unit as evidence — including
+ * pre-existing guards that disprove a finding. `addedRanges` (diff scope for
+ * detectors) must not restrict which lines a verdict can cite.
+ */
+export function unitFilesForAdjudication(
+  inputs: { file: string; content: string; addedRanges?: LineRange[] }[],
+): UnitFiles {
+  return unitFilesFromInputs(inputs.map(({ file, content }) => ({ file, content })));
+}
+
 function lineInRanges(line: number, ranges: LineRange[] | undefined, lineCount: number): boolean {
   if (!ranges || ranges.length === 0) return line >= 1 && line <= lineCount;
   return ranges.some((r) => line >= r.start && line <= r.end);
@@ -26,7 +39,10 @@ function lineInRanges(line: number, ranges: LineRange[] | undefined, lineCount: 
 
 /**
  * Does `citation` point at a real line in the analysis unit?
- * When added ranges are known, citations must fall on added/changed lines.
+ * When `entry.addedRanges` is set (detector-scoped units), citations must fall
+ * on added/changed lines. Adjudication callers should use
+ * {@link unitFilesForAdjudication}, which omits `addedRanges` so any in-unit
+ * line is citable evidence.
  */
 export function isValidCitation(citation: Citation, unit: UnitFiles): boolean {
   const entry = unit.files.get(citation.file);

@@ -55,7 +55,7 @@ function buildSystemPrompt(): string {
     "- Outcome must be one of: confirmed, rejected, needs_review.",
     "- confirmed or needs_review MUST include at least one citation with a valid file path and line numbers present in the snippet.",
     "- rejected SHOULD cite the line that disproves the finding when such a line exists; it may omit citations otherwise.",
-    "- Citations must use exact repo-relative file paths and 1-based line numbers from the snippet. Never invent files, lines, or guarantees not visible in the evidence.",
+    "- Citations must use exact repo-relative file paths and 1-based line numbers from the snippet. Any line visible in the snippet is citable — including pre-existing guards that disprove the finding. Never invent files, lines, or guarantees not visible in the evidence.",
     "- rationale must explain, with reference to the cited lines, why the finding stands or is a false positive.",
     "- proposedFix is optional; when present, describe the smallest concrete fix.",
     "",

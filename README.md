@@ -146,6 +146,8 @@ npm run scan -- . --adjudicate
 The adjudicator sends the enclosing function as context, so it can judge
 semantic comment-compliance — confirming when a comment promises a guarantee
 the code does not enforce, and rejecting when the adjacent code does enforce it.
+Verdict citations may point at any line in the changed file (including
+pre-existing guards), not only added diff lines.
 
 Offline adjudication tests (mock fetch, no network): `npm run test:adjudication:unit`.
 Opt-in live rubric eval (requires API key, not in CI): `npm run test:adjudication:live`.

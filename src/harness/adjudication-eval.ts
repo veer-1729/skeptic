@@ -6,7 +6,7 @@ import {
   adjudicateFindings,
 } from "../adjudication/adjudicate.js";
 import {
-  unitFilesFromInputs,
+  unitFilesForAdjudication,
   validateVerdict,
 } from "../adjudication/validate-citation.js";
 import type {
@@ -117,7 +117,7 @@ async function main(): Promise<void> {
   console.log("— adjudication eval —");
 
   for (const c of cases) {
-    const unit = unitFilesFromInputs(c.input.unitFiles);
+    const unit = unitFilesForAdjudication(c.input.unitFiles);
     const adjudicationInput: AdjudicationInput = {
       finding: c.input.finding,
       snippet: c.input.snippet,

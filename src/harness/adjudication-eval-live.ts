@@ -5,7 +5,7 @@ import {
   adjudicateFindings,
 } from "../adjudication/adjudicate.js";
 import { isLiveAdjudicatorConfigured, resolveAdjudicator } from "../adjudication/resolve-adjudicator.js";
-import { unitFilesFromInputs } from "../adjudication/validate-citation.js";
+import { unitFilesForAdjudication } from "../adjudication/validate-citation.js";
 import type {
   AdjudicationInput,
   AdjudicationVerdict,
@@ -106,7 +106,7 @@ async function main(): Promise<void> {
       console.log(`SKIP  ${c.name} (mock-only)`);
       continue;
     }
-    const unit = unitFilesFromInputs(c.input.unitFiles);
+    const unit = unitFilesForAdjudication(c.input.unitFiles);
     const adjudicationInput: AdjudicationInput = {
       finding: c.input.finding,
       snippet: c.input.snippet,
