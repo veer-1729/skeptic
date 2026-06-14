@@ -74,21 +74,42 @@ Legend: `[ ]` not started · `[f]` fixtures written & committed · `[x]` done
 
 ## Phase 2 — Slop ranking engine
 
-- [ ] domain-proximity multiplier — config-driven map of path
+- [x] domain-proximity multiplier — config-driven map of path
       patterns → domain (payments, auth, etc.), replacing the per-detector
       `sensitiveDomains` shortcut from phase 1
-- [ ] diff-size / session-length multiplier
-- [ ] dedup/correlation of findings that co-occur on the same file/lines
-- [ ] per-repo severity weight overrides (groundwork for the feedback loop)
+- [x] diff-size / session-length multiplier (diff-size band implemented;
+      session-length lands with Phase 5)
+- [x] dedup/correlation of findings that co-occur on the same file/lines
+      (per-file overlapping line ranges collapse to one survivor; absorbed
+      rule IDs recorded on `correlatedWith` — `src/ranking/dedup.ts`)
+- [x] per-repo severity weight overrides (groundwork for the feedback loop):
+      `repoPolicy` on UnitContext supports rule suppression + per-rule
+      base-severity override, applied before domain proximity —
+      `src/ranking/policy.ts`
 
 ## Phase 3 — Convention drift detector
 
-- [ ] repo embedding index (build + incremental update)
-- [ ] convention profile extraction (validation style, error shape, logging,
-      env access, test style, DB access pattern)
-- [ ] `convention-drift` findings with comparison-set evidence attached
-- [ ] fixture format for repo-context fixtures (needs a small reference repo,
-      not just single files)
+Logging slice landed end-to-end (real retrieval index, one convention shipped).
+
+- [x] repo embedding index (build) — deterministic `LocalLexicalEmbedder`
+      (feature-hashed TF) behind an `Embedder` seam + cosine `nearestNeighbors`
+      with same-folder/extension boost and stable tiebreak
+      (`src/retrieval/embedder.ts`, `src/retrieval/repo-index.ts`). Incremental
+      update / caching deferred (build-per-unit is fine for the harness).
+- [x] convention profile extraction — **logging** convention implemented
+      (`fileLoggingStyle` + `loggingProfile` with adherence thresholds,
+      `src/context/conventions/logging.ts`). Other signals (validation style,
+      error shape, env access, test style, DB access pattern) remain.
+- [x] `convention-drift` findings with comparison-set evidence attached —
+      `logging-convention-drift` detector emits `Finding.comparisonSet`
+      (`src/detectors/convention-drift/logging-convention-drift.ts`); ranking
+      layers domain proximity on top unchanged
+- [x] fixture format for repo-context fixtures — `repo/` corpus + `changed`
+      manifest in `meta.json`, split into changed inputs vs. context-only
+      corpus; flat fixtures unchanged. 6 logging fixtures (2 positive incl. a
+      domain-proximity composition test, 4 negative controls)
+- [ ] remaining convention signals (error shape, env access, validation, DB
+      access, naming/placement) + a model-based embedder via the existing seam
 
 ## Phase 4 — Adjudication step
 

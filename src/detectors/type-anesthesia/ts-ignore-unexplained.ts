@@ -1,5 +1,4 @@
 import type { Detector, Finding } from "../../types.js";
-import { isSensitiveDomain } from "../../context/domains.js";
 
 /**
  * Flags `@ts-ignore` / `@ts-expect-error` directives that carry no
@@ -19,7 +18,7 @@ export const tsIgnoreUnexplainedDetector: Detector = {
   id: "ts-ignore-unexplained",
   category: "type-anesthesia",
 
-  run({ file, content, meta }) {
+  run({ file, content }) {
     const findings: Finding[] = [];
     const lines = content.split("\n");
 
@@ -36,7 +35,7 @@ export const tsIgnoreUnexplainedDetector: Detector = {
       findings.push({
         category: "type-anesthesia",
         ruleId: "ts-ignore-unexplained",
-        severity: isSensitiveDomain(meta?.domain) ? "high" : "medium",
+        severity: "medium",
         file,
         lineStart: index + 1,
         lineEnd: index + 1,

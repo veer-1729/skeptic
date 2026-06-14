@@ -1,6 +1,5 @@
 import ts from "typescript";
 import type { Detector, Finding } from "../../types.js";
-import { isSensitiveDomain } from "../../context/domains.js";
 import { isNarrowedBefore } from "../../context/narrowing.js";
 
 /**
@@ -21,7 +20,7 @@ export const nonNullAssertionNearNullableDetector: Detector = {
   id: "non-null-assertion-near-nullable",
   category: "type-anesthesia",
 
-  run({ file, content, meta }) {
+  run({ file, content }) {
     const findings: Finding[] = [];
     const sourceFile = ts.createSourceFile(
       file,
@@ -46,7 +45,7 @@ export const nonNullAssertionNearNullableDetector: Detector = {
             findings.push({
               category: "type-anesthesia",
               ruleId: "non-null-assertion-near-nullable",
-              severity: isSensitiveDomain(meta?.domain) ? "high" : "medium",
+              severity: "medium",
               file,
               lineStart: line + 1,
               lineEnd: line + 1,

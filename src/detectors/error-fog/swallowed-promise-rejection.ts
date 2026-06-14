@@ -1,6 +1,5 @@
 import ts from "typescript";
 import type { Detector, Finding } from "../../types.js";
-import { isSensitiveDomain } from "../../context/domains.js";
 
 /**
  * Flags `.catch(handler)` where the handler is an inline function whose body
@@ -16,7 +15,7 @@ export const swallowedPromiseRejectionDetector: Detector = {
   id: "swallowed-promise-rejection",
   category: "error-fog",
 
-  run({ file, content, meta }) {
+  run({ file, content }) {
     const findings: Finding[] = [];
     const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
@@ -32,7 +31,7 @@ export const swallowedPromiseRejectionDetector: Detector = {
         findings.push({
           category: "error-fog",
           ruleId: "swallowed-promise-rejection",
-          severity: isSensitiveDomain(meta?.domain) ? "high" : "medium",
+          severity: "medium",
           file,
           lineStart: line + 1,
           lineEnd: line + 1,

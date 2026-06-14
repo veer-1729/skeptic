@@ -1,0 +1,11 @@
+[
+  {
+    "category": "type-anesthesia",
+    "ruleId": "as-any-cast",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "medium",
+    "rank": 1,
+    "diffSizeMultiplier": 1.15
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "category": "magic-fallback",
+    "ruleId": "hardcoded-secret-fallback",
+    "lineStart": 1,
+    "lineEnd": 1,
+    "severity": "high",
+    "rank": 1
+  },
+  {
+    "category": "type-anesthesia",
+    "ruleId": "as-any-cast",
+    "lineStart": 2,
+    "lineEnd": 2,
+    "severity": "medium",
+    "rank": 2
+  }
+]

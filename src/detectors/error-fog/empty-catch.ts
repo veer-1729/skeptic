@@ -1,20 +1,19 @@
 import ts from "typescript";
 import type { Detector, Finding } from "../../types.js";
-import { isSensitiveDomain } from "../../context/domains.js";
 
 /**
  * Flags `catch` blocks with no executable body — `catch (e) {}` or a block
  * whose only content is a comment. Comments are not statements, so an
  * empty-statement block and a comment-only block are the same shape to the
  * AST, and both swallow the error silently: the error-fog smell of trading
- * observability for "doesn't crash". Severity bumps to "high" in a sensitive
- * domain via the shared `isSensitiveDomain` shortcut.
+ * observability for "doesn't crash". Emits a base severity of "medium"; the
+ * ranking engine raises it to "high" for sensitive-domain files.
  */
 export const emptyCatchDetector: Detector = {
   id: "empty-catch",
   category: "error-fog",
 
-  run({ file, content, meta }) {
+  run({ file, content }) {
     const findings: Finding[] = [];
     const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
@@ -24,7 +23,7 @@ export const emptyCatchDetector: Detector = {
         findings.push({
           category: "error-fog",
           ruleId: "empty-catch",
-          severity: isSensitiveDomain(meta?.domain) ? "high" : "medium",
+          severity: "medium",
           file,
           lineStart: line + 1,
           lineEnd: line + 1,

@@ -1,6 +1,5 @@
 import ts from "typescript";
 import type { Detector, Finding } from "../../types.js";
-import { isSensitiveDomain } from "../../context/domains.js";
 
 /**
  * Flags a non-empty catch block that never references the caught error and
@@ -20,7 +19,7 @@ export const broadCatchGeneric500Detector: Detector = {
   id: "broad-catch-generic-500",
   category: "error-fog",
 
-  run({ file, content, meta }) {
+  run({ file, content }) {
     const findings: Finding[] = [];
     const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
@@ -32,7 +31,7 @@ export const broadCatchGeneric500Detector: Detector = {
           findings.push({
             category: "error-fog",
             ruleId: "broad-catch-generic-500",
-            severity: isSensitiveDomain(meta?.domain) ? "high" : "medium",
+            severity: "medium",
             file,
             lineStart: line + 1,
             lineEnd: line + 1,

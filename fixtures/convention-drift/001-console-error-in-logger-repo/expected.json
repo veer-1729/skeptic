@@ -1,0 +1,10 @@
+[
+  {
+    "category": "convention-drift",
+    "ruleId": "logging-convention-drift",
+    "severity": "medium",
+    "lineStart": 7,
+    "lineEnd": 7,
+    "comparisonSet": ["src/routes/orders.ts", "src/routes/users.ts"]
+  }
+]
